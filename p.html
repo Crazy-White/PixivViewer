@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+ <head> 
+  <title>Painter</title> 
+  <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css" /> 
+  <meta charset="utf-8" /> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" /> 
+  <meta name="robots" content="index,follow" /> 
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" /> 
+  <meta name="format-detection" content="telphone=no, email=no" /> 
+<style>
+.avatar-title{padding:0px 10px}
+</style>
+</head>
+<body>
+<script>
+function ajax(options){
+    var xhr = null;
+    var params = formsParams(options.data);
+    //创建对象
+    if(window.XMLHttpRequest){
+        xhr = new XMLHttpRequest()
+    } else {
+        xhr = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    // 连接
+    if(options.type == "GET"){
+        xhr.open(options.type,options.url + params,options.async);
+        xhr.send(null)
+    } else if(options.type == "POST"){
+        xhr.open(options.type,options.url,options.async);
+        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+        xhr.send(params);
+    }
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState == 4 && xhr.status == 200){
+            options.success(xhr.responseText);
+        }
+    }
+    function formsParams(data){
+        var arr = [];
+        for(var prop in data){
+            arr.push(prop + "=" + data[prop]);
+        }
+        return arr.join("&");
+    }
+ 
+}
+//函数
+var path=location.href;
+var i=new RegExp("id\=[0-9]{4,12}");
+path=i.exec(path);
+ii=new RegExp("[0-9]{4,12}");
+id=ii.exec(path);
+document.title="Painter "+id;
+//if(ii.test(path)==false){document.write（"出错"）；}
+
+ajax({
+    url : "https://api.imjad.cn/pixiv/v2/?type=member&id="+id,  // url---->地址
+    type : "GET",   // type ---> 请求方式
+    async : true,   // async----> 同步：false，异步：true 
+    success : function(json){   //返回接受信息
+       let data=JSON.parse(json);
+       document.getElementById("get").innerHTML=
+""
++"<div class='card' style='background:url(view.php/"
++data['profile']['background_image_url']
++");background-size:100% 100%;background-repeat:no-repeat;'>"
++"<div class='card-header'><figure class='avatar avatar-xl'><img src='view.php/"
++data['user']['profile_image_urls']['medium']
++"'></figure>"
++"<span class='avatar-title'>"
++data['user']['name']
++"</span></div>"
++"<div class='card-body'>"
++"<div><strong>id</strong>:"
++data['user']['id']
++"</div>"
++"<div><strong>account</strong>:"
++data['user']['account']
++"</div>"
++"<div><strong>comment</strong>:"
++data['user']['comment']
++"</div>"
++"<div><strong>gender</strong>:"
++data['profile']['gender']
++"</div>"
++"<div><strong>region</strong>:"
++data['profile']['region']
++"</div>"
++"<div><strong>twitter_account</strong>:"
++data['profile']['twitter_account']
++"</div>"
++"<div><strong>twitter_url</strong>:"
++data['profile']['twitter_url']
++"</div>"
++"</div>"
++"</div>";
+    }
+})
+</script>
+<p id="get"></p>
+</body>
+</html>
