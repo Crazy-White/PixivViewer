@@ -1,0 +1,67 @@
+<!Doctype html>
+<html>
+  <head>
+  	<title>PixivViewer</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="static/mui.min.css" rel="stylesheet" type="text/css" />
+    <link href="static/style.css" rel="stylesheet" type="text/css" />
+    <script src="static/mui.min.js"></script>
+    <script src="static/jquery-3.4.1.min.js"></script>
+    <script src="static/lazyload.min.js"></script>
+    <link href="static/sanitize.css" rel="stylesheet" />
+    <link href="static/typography.css" rel="stylesheet" />
+    <script src="static/script.js"></script>
+  </head>
+  <body>
+    <div id="sidedrawer" class="mui--no-user-select">
+      <div id="sidedrawer-brand" class="mui--appbar-line-height">
+        <span class="mui--text-title">PixivViewer</span>
+      </div>
+      <div class="mui-divider"></div>
+      <ul>
+        <li>
+          <strong>导航</strong>
+          <ul>
+            <li><a href="index.php">首页</a></li>
+            <li><a href="https://blog.poo.li">博客</a></li>
+            <li><a href="https://github.com/Crazy-White">Github</a></li>
+            <li><a href="https://space.bilibili.com/37090102/">Bilibili</a></li>
+          </ul>
+        </li>
+        <li>
+          <strong>友链</strong>
+          <ul>
+            <li><a href="#">Item 1</a></li>
+            <li><a href="#">Item 2</a></li>
+            <li><a href="#">Item 3</a></li>
+          </ul>
+        </li>
+        <li>
+          <strong>排行榜</strong>
+          <ul>
+            <li><a href="list.php?type=rank&mode=day">日榜</a></li>
+            <li><a href="list.php?type=rank&mode=week">周榜</a></li>
+            <li><a href="list.php?type=rank&mode=month">月榜</a></li>
+            <li><a href="list.php?type=rank&mode=week_rookie">新人</a></li>  
+            <li><a href="list.php?type=rank&mode=week_original">原创</a></li>
+            <li><a href="list.php?type=rank&mode=day_male">男性向</a></li>
+            <li><a href="list.php?type=rank&mode=day_female">女性向</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <header id="header">
+      <div class="mui-appbar mui--appbar-line-height">
+        <div class="mui-container-fluid">
+          <a class="sidedrawer-toggle mui--visible-xs-inline-block mui--visible-sm-inline-block js-show-sidedrawer">☰</a>
+          <a class="sidedrawer-toggle mui--hidden-xs mui--hidden-sm js-hide-sidedrawer">☰</a>
+          <span class="mui--text-title mui--visible-xs-inline-block mui--visible-sm-inline-block">PixivViewer</span>
+        </div>
+      </div>
+    </header>
+        <div id="content-wrapper">
+      <div class="mui--appbar-height"></div>
+      <div class="mui-container-fluid">
+        <br>
