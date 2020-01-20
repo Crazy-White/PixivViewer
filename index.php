@@ -1,6 +1,9 @@
 <?php include "static/header.html"; ?>
-        <h1>PixivViewer+</h1>
-        <p>重构版本</p>
+        <h1>PixivViewer</h1>
+        <p>重构版本,目前仍在开发状态</p>
+        <div class="mui--text-center">
+        	<img src="static/logo.png" alt="logo">
+</div>
         <form class="mui-form" method="get" action="illust.php">
   <div class="mui-textfield mui-textfield--float-label">
     <input type="number" name="id">
