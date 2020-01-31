@@ -1,19 +1,40 @@
-<?php include "static/header.html"; ?>
 <?php
+include "static/header.html";
+require "function.php";
 /*输入变量*/
 $id=$_GET['id'];
 $type=$_GET['type'];
 $page=(empty($_GET['page'])) ? 1 : $_GET['page'];
 $mode=$_GET['mode'];
-$quality=(empty($_GET['quality'])) ? "large" : $_GET['quality'];
+$quality=$_GET['quality'];
 //quality可选参数[square_medium/medium/large]
+/*处理变量*/
+$error=(empty($id) && $type!="rank")?array("id is not defined"): array("");
+(empty($type))?array_push($error,"type is not defined") : "";
+$mistake=($page<1)?array("page can not fewer than 1") : array("");
+if($type=="rank" && isset($mode)){
+$mode_check=array("day","week","month","week_rookie","week_original","day_male","day_female");
+	if(!in_array($mode,$mode_check)){
+		array_push($mistake, "mode can not be {$mode}");
+		$mode="week";
+    }
+}
+
+if(empty($_GET['quality'])){
+	$quality="large";
+}else{
+$quality_check=array("square_medium","medium","large");
+if(!in_array($quality,$quality_check)){
+	array_push($error, "quality can not be {$quality}");
+	$quality="large";
+    }
+}
 /*获取数据*/
-require "function.php";//函数
 $api = "https://api.imjad.cn/pixiv/v2/?type={$type}&id={$id}&page={$page}&mode={$mode}";
-$data = file_get_contents($api);
-//$data=preg_replace('/i.pximg.net/i','i.pixiv.cat',$data);
-$data=json_decode($data,true);
-$count=count($data["illusts"]);
+try{
+     $data=get_data($api);
+     $count=count($data["illusts"]);
+
 ?>
 <script>
 	document.title = "<?php echo "$type"." "."$id"; ?>";
@@ -55,5 +76,12 @@ $count=count($data["illusts"]);
                     <!--echo end-->
   </div>
 </div>
-<?php include "debug.php"; ?>
-<?php include "static/footer.html"; ?>
+<?php 
+}catch(Exception $e)
+{
+    echo 'Message: ' .$e->getMessage();
+}
+echo error_print($error).error_print($mistake);
+include "debug.php";
+include "static/footer.html";
+ ?>

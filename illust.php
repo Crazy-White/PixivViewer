@@ -1,20 +1,16 @@
-<?php include "static/header.html"; ?>
-<?php
+<?php 
+include "static/header.html"; 
 require "function.php";
 /*输入变量*/
 $id = $_GET["id"];
+(empty($id))?$error=array("id is not defined"):"";
+if(isset($error)){
+    echo error_print($error);
+}
 $api = "https://api.imjad.cn/pixiv/v2/?type=illust&id={$id}";
 /*获取数据*/
-$painting = file_get_contents($api);
-//$json = preg_replace('/i.pximg.net/i', 'i.pixiv.cat', $painting);
-/*读完json后，检测是否出错
-if(strlen($painting)<50){
-header("Location: error.php?from={$_SERVER['HTTP_REFERER']}");
-}
-if(isset($painting["error"]["user_message"])){
-header("Location: error.php");
-}*/
-
+try{
+$painting = get_data($api);
 $painting = json_decode($painting, true);
 //数据变量
 $painting = $painting["illust"];
@@ -117,5 +113,11 @@ foreach ($painting["tags"] as $value)
 </script>
 <button class="mui-btn mui-btn--primary mui--pull-right" onclick="activateNext();">Next</button>
     <div class="mui--clearfix"></div>
-<?php include "debug.php"; ?>
-<?php include "static/footer.html";  ?>
+<?php
+}catch(Exception $e)
+{
+    echo 'Message: ' .$e->getMessage();
+}
+include "debug.php";
+include "static/footer.html"; 
+ ?>

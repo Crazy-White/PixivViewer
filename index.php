@@ -17,7 +17,7 @@
   <div class="mui-textfield mui-textfield--float-label">
     <input type="number" name="id">
     <label>画师</label>
-    <input type="hidden" name="type" value="illust_member">
+    <input type="hidden" name="type" value="member_illust">
   </div>
   <button type="submit" class="mui-btn mui-btn--raised mui--pull-right">查看</button>
     <div class="mui--clearfix"></div>
@@ -33,5 +33,7 @@
 </form>
 <!--第三个form-->
 	<div class="mui-divider"></div>
-	<button class="mui-btn mui-btn--raised" onclick="window.open('list.php?type=rank')">周榜</button>
+	<button class="mui-btn mui-btn--raised" onclick="window.open('list.php?type=rank&mode=day')">日榜</button>
+	<button class="mui-btn mui-btn--raised" onclick="window.open('list.php?type=rank&mode=week')">周榜</button>
+	<button class="mui-btn mui-btn--raised" onclick="window.open('list.php?type=rank&mode=month')">周榜</button>
 <?php include "static/footer.html"; ?>

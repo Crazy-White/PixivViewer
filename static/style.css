@@ -176,6 +176,7 @@ buttons {
 /**
  * Additional CSS
  */
+ img{max-width:100%}
 .panel-img,.illust-img{display:block;height:auto;width:100%}
 .illust-img{margin:5px auto;max-width:100%}
 .card-header{position:relative;height:72px;-webkit-box-sizing:border-box;box-sizing:border-box;padding:16px}.card-header-avatar{float:left;width:40px;height:40px;border-radius:50%}.card-header-title{display:block;margin-left:52px;overflow:hidden;font-size:16px;font-weight:500;line-height:20px;text-overflow:ellipsis;white-space:nowrap;opacity:.87}.card-header-subtitle{display:block;margin-left:52px;overflow:hidden;font-size:14px;font-weight:400;line-height:20px;text-overflow:ellipsis;white-space:nowrap;opacity:.54}

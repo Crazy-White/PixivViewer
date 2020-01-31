@@ -1,21 +1,21 @@
 <?php
-//require "function.php"; 
+require "function.php"; 
+include "static/header.html"; 
+//获取变量
 $id=$_GET['id'];
+//处理变量
 $page=(empty($_GET['page'])) ? 1 : $_GET['page'];
-function pagination($page, $num)
-{//上下页
-    $page = intval($page);
-    $page = $page + $num;
-    return strval($page);
+$mistake=($page<1)?array("page can not fewer than 1") : array("");
+(empty($id))?$error=array("id is not defined"):"";
+if(isset($error)){
+    echo error_print($error);
 }
+    echo error_print($mistake);
 $api = "https://api.imjad.cn/pixiv/v2/?type=following&id={$id}&page={$page}";
-$json = file_get_contents($api);
-$json = preg_replace('/i.pximg.net/i', 'i.pixiv.cat', $json);
-$data = json_decode($json, true);
+try{
+$data=get_data($api);
 $count = count($data["user_previews"]);
 ?>
-
-<?php include "static/header.html"; ?>
 <script>
 	document.title = "following <?php echo "$id"; ?>";
 </script>
@@ -31,7 +31,7 @@ $count = count($data["user_previews"]);
   <a href='list.php?type=member_illust&id={$forlist["id"]}'>
     <div class='mui-panel'>
       <div class='card-header'>
-        <img class='card-header-avatar' src='{$forlist["profile_image_urls"]["medium"]}'
+        <img class='card-header-avatar' src='".image_proxy($forlist["profile_image_urls"]["medium"])."'
         alt='{$forlist["name"]}'>
         <div class='card-header-title'>
           {$forlist["name"]}
@@ -52,9 +52,6 @@ $count = count($data["user_previews"]);
 <!--上下页-->
 	<div class="mui-container-fluid">
   
-
-
-
 <table width="100%">
   <tr>
     <td width="50%" style="padding-bottom:20px;">
@@ -76,6 +73,12 @@ echo pagination($page, 1); ?></small> Next &raquo;</a>
   </tr>
 </table>
 
-
 </div>
-<?php include "static/footer.html"; ?>
+<?php 
+}catch(Exception $e)
+{
+    echo 'Message: ' .$e->getMessage();
+}
+include "debug.php";
+include "static/footer.html"; 
+?>
