@@ -1,4 +1,5 @@
 <?php include "static/header.html"; ?>
+<style>button[type="submit"]{position:relative;top:-64px;}</style>
         <h1>PixivViewer</h1>
         <p>重构版本,目前仍在开发状态</p>
         <div class="mui--text-center">
@@ -6,7 +7,7 @@
 </div>
         <form class="mui-form" method="get" action="illust.php">
   <div class="mui-textfield mui-textfield--float-label">
-    <input type="number" name="id">
+    <input type="number" name="id" required>
     <label>图片</label>
   </div>
   <button type="submit" class="mui-btn mui-btn--raised mui--pull-right">查看</button>
@@ -15,7 +16,7 @@
 <!--第一个form-->
 	     <form class="mui-form" method="get" action="list.php">
   <div class="mui-textfield mui-textfield--float-label">
-    <input type="number" name="id">
+    <input type="number" name="id" required>
     <label>画师</label>
     <input type="hidden" name="type" value="member_illust">
   </div>
@@ -25,7 +26,7 @@
 <!--第二个form-->
 	    <form class="mui-form" method="get" action="following.php">
   <div class="mui-textfield mui-textfield--float-label">
-    <input type="number" name="id">
+    <input type="number" name="id" required>
     <label>关注</label>
   </div>
   <button type="submit" class="mui-btn mui-btn--raised mui--pull-right">查看</button>

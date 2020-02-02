@@ -11,7 +11,6 @@ $api = "https://api.imjad.cn/pixiv/v2/?type=illust&id={$id}";
 /*获取数据*/
 try{
 $painting = get_data($api);
-$painting = json_decode($painting, true);
 //数据变量
 $painting = $painting["illust"];
 //多p图片
