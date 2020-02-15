@@ -25,26 +25,40 @@ function addCounter() {
     Cookies.set("counter", Number(Cookies.get("counter")) + 1)
 }
 
-function removeData(num) {
-    app.localData.splice(num, 1);
+function removeStar(num) {
+    app.localStar.splice(num, 1);
 }
 
-function addData(data) {
-    app.localData.push(data)
+function addHistory(data) {
+    app.localHistory.push(data)
 }
 
-function saveData() {
-    Cookies.set("history", JSON.stringify(app.localData));
+function addStar(data) {
+    app.localStar.push(data);
+    saveData("star");
+    mdui.snackbar({
+        message: '收藏成功！',
+        position: 'right-top'
+    });
+}
+
+function saveData(method) {
+    if (method === "star") {
+        Cookies.set("star", JSON.stringify(app.localStar));
+    }
+    if (method === "history") {
+        Cookies.set("history", JSON.stringify(app.localHistory));
+    }
 }
 
 function recovery() {
     app.clearResponse();
-    app.isPreview = app.showHotTags = app.showDetailTags = app.showDetailMsg = app.showHistory = false;
+    app.isPreview = app.showHotTags = app.showDetailTags = app.showDetailMsg = false;
     app.Ppage = 1;
     app.Purl = app.PlastUrl = '';
     Cookies.remove("counter");
     Cookies.remove("history");
-    app.localData = [];
+    app.localHistory = [];
     mdui.alert("完成!");
 }
 		</script>
@@ -347,9 +361,9 @@ function recovery() {
 						<button class="mdui-btn mdui-ripple" v-on:click="Ptype='related';Pid=illust.id;parseApi('typeA')">
 							相关
 						</button>
-						<button class="mdui-btn mdui-btn-icon mdui-float-right">
+						<button class="mdui-btn mdui-btn-icon mdui-float-right" onclick="addStar(app.Purl)">
 							<i class="mdui-icon material-icons">
-								open_in_new
+								star
 							</i>
 						</button>
 					</div>
@@ -395,9 +409,9 @@ function recovery() {
 						<button class="mdui-btn mdui-ripple">
 							无效按钮
 						</button>
-						<button class="mdui-btn mdui-btn-icon mdui-float-right">
+						<button class="mdui-btn mdui-btn-icon mdui-float-right" onclick="addStar(app.Purl)">
 							<i class="mdui-icon material-icons">
-								expand_more
+								star
 							</i>
 						</button>
 					</div>
@@ -405,23 +419,24 @@ function recovery() {
 			</div>
 			<!---循环结束B-->
 			<!--历史记录-->
-			<div class="mdui-card history" v-if="showHistory">
-				<button onclick="app.localData=[];saveData();app.showHistory=false" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
-					清空历史记录
-				</button>
-				历史记录：升序排列
-				<button class="mdui-btn mdui-btn-icon mdui-btn-raised mdui-color-theme-accent mdui-float-right"
-				v-on:click="showHistory=false">
-					<i class="mdui-icon material-icons">
-						close
-					</i>
-				</button>
-				<div class="mdui-card-primary">
-					<div class="mdui-list" v-for="url in localData">
+			<div class="mdui-dialog" id="myHistory">
+				<div class="mdui-dialog-title">
+					历史
+				</div>
+				<div class="mdui-dialog-content">
+					<div class="mdui-list" v-for="url in localHistory">
 						<a v-on:click="parseApi(null,url)" class="mdui-list-item mdui-ripple">
 							{{url}}
 						</a>
 					</div>
+				</div>
+				<div class="mdui-dialog-actions">
+					<button class="mdui-btn mdui-ripple" onclick="app.localHistory=[];saveData('history');">
+						清空
+					</button>
+					<button class="mdui-btn mdui-ripple" mdui-dialog-close>
+						关闭
+					</button>
 				</div>
 			</div>
 			<!--设置-->
@@ -454,9 +469,30 @@ function recovery() {
 					</button>
 				</div>
 			</div>
+			<!--收藏-->
+			<div class="mdui-dialog" id="myStar">
+				<div class="mdui-dialog-title">
+					收藏
+				</div>
+				<div class="mdui-dialog-content">
+					<div class="mdui-list" v-for="url in localStar">
+						<a v-on:click="parseApi(null,url)" class="mdui-list-item mdui-ripple">
+							{{url}}
+						</a>
+					</div>
+				</div>
+				<div class="mdui-dialog-actions">
+					<button class="mdui-btn mdui-ripple" onclick="app.localStar=[];saveData('star');">
+						清空
+					</button>
+					<button class="mdui-btn mdui-ripple" mdui-dialog-close>
+						关闭
+					</button>
+				</div>
+			</div>
 			<!---底部导航栏-->
 			<div class="mdui-bottom-nav mdui-bottom-nav-text-auto mdui-bottom-nav-scroll-hide">
-				<a href="javascript:app.showHistory=false;" class="mdui-ripple mdui-bottom-nav-active">
+				<a href="javascript:;" class="mdui-ripple mdui-bottom-nav-active">
 					<i class="mdui-icon material-icons">
 						wallpaper
 					</i>
@@ -464,7 +500,7 @@ function recovery() {
 						首页
 					</label>
 				</a>
-				<a href="javascript:app.showHistory=!app.showHistory;" class="mdui-ripple">
+				<a href="javascript:void(0);" mdui-dialog="{target: '#myHistory'}" class="mdui-ripple">
 					<i class="mdui-icon material-icons">
 						visibility
 					</i>
@@ -480,12 +516,12 @@ function recovery() {
 						设置
 					</label>
 				</a>
-				<a href="javascript:;" class="mdui-ripple">
+				<a href="javascript:void(0);" mdui-dialog="{target: '#myStar'}" class="mdui-ripple">
 					<i class="mdui-icon material-icons">
-						search
+						star
 					</i>
 					<label>
-						搜索
+						收藏
 					</label>
 				</a>
 			</div>
@@ -510,13 +546,13 @@ function recovery() {
         Perror: '',
         mdui: '',
         picked: 'planA',
-        loaclData: '',
+        localHistory: '',
+        localStar: '',
         isPreview: false,
         isDisabled: true,
         showHotTags: false,
         showDetailTags: false,
         showDetailMsg: false,
-        showHistory: false
     },
 
     methods: {
@@ -567,8 +603,8 @@ function recovery() {
             }
             //保存记录到cookies
             //addCounter();
-            addData(app.Purl);
-            saveData();
+            addHistory(app.Purl);
+            saveData('history');
             //弹出snackbar
             mdui.snackbar({
                 message: '查询中，切勿重复点击！',
@@ -640,9 +676,10 @@ function recovery() {
 app.mdui = mdui;
 if (Cookies.get("counter") === undefined) {
     Cookies.set("counter", 0);
-    app.localData = [];
+    app.localHistory = app.localStar = [];
 } else {
-    app.localData = JSON.parse(Cookies.get("history"));
+    app.localHistory = JSON.parse(Cookies.get("history"));
+    app.localStar = JSON.parse(Cookies.get("star"));
 }
 
 function arrayAddProxy(arr) { //给数组(对象)添加代理
