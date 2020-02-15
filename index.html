@@ -15,14 +15,45 @@
 		<link href="src/mdui/css/mdui.min.css" rel="stylesheet">
 		<script src="src/mdui/js/mdui.min.js">
 		</script>
+		<script src="src/js.cookie.min.js">
+		</script>
 		<script>
 			new VConsole();
 var $$ = mdui.JQ;
+
+function addCounter() {
+    Cookies.set("counter", Number(Cookies.get("counter")) + 1)
+}
+
+function removeData(num) {
+    app.localData.splice(num, 1);
+}
+
+function addData(data) {
+    app.localData.push(data)
+}
+
+function saveData() {
+    Cookies.set("history", JSON.stringify(app.localData));
+}
+
+function recovery() {
+    app.clearResponse();
+    app.isPreview = app.showHotTags = app.showDetailTags = app.showDetailMsg = app.showHistory = false;
+    app.Ppage = 1;
+    app.Purl = app.PlastUrl = '';
+    Cookies.remove("counter");
+    Cookies.remove("history");
+    app.localData = [];
+    mdui.alert("完成!");
+}
 		</script>
 		<style>
 			img{ max-width:100% } .config button{margin-bottom:2px}.show{display:inline}.hide{display:none}
 			.main-content{white-space: nowrap;overflow: scroll} .mdui-card{margin-bottom:2px}
 			.main-preview{justify-content:space-between;display:flex}.main-preview>.mdui-card{width:50%}
+			.history{position:fixed;top:0px;width:90%;margin:auto;z-index:999} .history
+			button{z-index:9999}
 		</style>
 	</head>
 	<body class="mdui-theme-primary-teal mdui-theme-accent-pink mdui-bottom-nav-fixed">
@@ -30,18 +61,22 @@ var $$ = mdui.JQ;
 			<!--vue开始-->
 			<div class="config main-content mdui-shadow-2 mdui-p-a-1 mdui-m-t-1">
 				请求api: {{Purl}}
-				<br>
+				<br />
 				上次请求: {{PlastUrl}}
-				<br>
+				<br />
 				<div class="-mdui-btn-group">
-					<button onclick="if(app.PlastUrl!=='')app.phraseApi(null,app.PlastUrl)" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
+					<button onclick="if(app.PlastUrl!=='')app.parseApi(null,app.PlastUrl)"
+					class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
 						查询上次请求
 					</button>
-					<button v-on:click="PresponseA='';" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
+					<button v-on:click="clearResponse()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
 						清空输出
 					</button>
 					<button v-on:click="PlastUrl='';" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
 						清空上次请求
+					</button>
+					<button onclick="recovery()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
+						变量初始化(出错时使用)
 					</button>
 				</div>
 				<label class="mdui-checkbox">
@@ -51,12 +86,25 @@ var $$ = mdui.JQ;
 					预览画师图片
 				</label>
 				<label class="mdui-checkbox">
-					<input type="checkbox" v-model="showTags" />
+					<input type="checkbox" v-model="showHotTags" />
 					<i class="mdui-checkbox-icon">
 					</i>
 					查看热门标签
 				</label>
-				<br>
+				<br />
+				<label class="mdui-switch">
+					<input type="checkbox" v-model="showDetailMsg" />
+					<i class="mdui-switch-icon">
+					</i>
+				</label>
+				显示作品说明(图片右上角)
+				<label class="mdui-switch">
+					<input type="checkbox" v-model="showDetailTags" />
+					<i class="mdui-switch-icon">
+					</i>
+				</label>
+				显示作品标签
+				<br />
 				根据id查询：
 				<input v-model.number="Pid" class="mdui-textfield-input" type="number"
 				style="max-width:50%;display:inline" placeholder="输入id...">
@@ -90,13 +138,13 @@ var $$ = mdui.JQ;
 					</option>
 				</select>
 				<button class="mdui-btn mdui-btn-icon mdui-btn-raised mdui-color-theme-accent"
-				v-on:click="phraseApi('typeA')">
+				v-on:click="parseApi('typeA')">
 					<i class="mdui-icon material-icons">
 						search
 					</i>
 				</button>
 				<!--分割线-->
-				<br>
+				<br />
 				根据关键词查询：
 				<input v-model="Pkey" class="mdui-textfield-input" type="text" style="max-width:100px;display:inline"
 				placeholder="输入关键词...">
@@ -115,12 +163,12 @@ var $$ = mdui.JQ;
 					</option>
 				</select>
 				<button class="mdui-btn mdui-btn-icon mdui-btn-raised mdui-color-theme-accent"
-				v-on:click="phraseApi('search')">
+				v-on:click="parseApi('search')">
 					<i class="mdui-icon material-icons">
 						search
 					</i>
 				</button>
-				<br>
+				<br />
 				<!--分割线-->
 				查询排行榜：
 				<select v-model="PmodeRank" class="mdui-select" mdui-select>
@@ -154,17 +202,17 @@ var $$ = mdui.JQ;
 				</span>
 				<input type="date" min="2006-12-31" v-model="Pdate">
 				<button class="mdui-btn mdui-btn-raised mdui-btn-icon mdui-color-theme-accent"
-				v-on:click="phraseApi('rank')">
+				v-on:click="parseApi('rank')">
 					<i class="mdui-icon material-icons">
 						search
 					</i>
 				</button>
 				<!--分割线-->
-				<br>
+				<br />
 				<span>
 					翻页
 				</span>
-				<button v-on:click="Ppage -= 1;phraseApi()" class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-ripple"
+				<button v-on:click="Ppage -= 1;parseApi()" class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-ripple"
 				v-bind:disabled="isDisabled">
 					<i class="mdui-icon material-icons">
 						chevron_left
@@ -172,7 +220,7 @@ var $$ = mdui.JQ;
 				</button>
 				<input v-model.number="Ppage" class="mdui-textfield-input" type="number"
 				style="max-width:50px;display:inline" placeholder="指定页">
-				<button v-on:click="Ppage += 1;phraseApi()" class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-ripple"
+				<button v-on:click="Ppage += 1;parseApi()" class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-ripple"
 				v-bind:disabled="isDisabled">
 					<i class="mdui-icon material-icons">
 						chevron_right
@@ -210,8 +258,8 @@ var $$ = mdui.JQ;
 					<div class="mdui-card-media">
 						<img :src="illust.image_urls.large" />
 						<!-- 卡片中可以包含一个或多个菜单按钮 -->
-						<div class="mdui-card-menu">
-							<button class="mdui-btn mdui-btn-icon mdui-text-color-white" v-on:click='mdui.alert(illust.caption+"<br><br>原图"+illust.meta_single_page.original_image_url, "细节")'>
+						<div class="mdui-card-menu" v-if="showDetailMsg">
+							<button class="mdui-btn mdui-btn-icon mdui-text-color-white" v-on:click='mdui.alert(illust.caption+"<br /><br />原图"+illust.meta_single_page.original_image_url, "细节")'>
 								<i class="mdui-icon material-icons">
 									link
 								</i>
@@ -228,7 +276,7 @@ var $$ = mdui.JQ;
 						</div>
 					</div>
 					<!-- 卡片的内容 -->
-					<div class="mdui-card-content mdui-typo main-content">
+					<div class="mdui-card-content mdui-typo main-content" v-if="showDetailTags">
 						<div class="mdui-chip">
 							<span class="mdui-chip-icon">
 								<i class="mdui-icon material-icons">
@@ -276,7 +324,7 @@ var $$ = mdui.JQ;
 								</i>
 							</span>
 							<span class="mdui-chip-title">
-								时间{{illust.creat_date}}
+								时间{{illust.create_date}}
 							</span>
 						</div>
 						<br />
@@ -293,10 +341,10 @@ var $$ = mdui.JQ;
 					</div>
 					<!-- 卡片的按钮 -->
 					<div class="mdui-card-actions">
-						<button class="mdui-btn mdui-ripple" v-on:click="Ptype='member_illust';Pid=illust.user.id;phraseApi('typeA')">
+						<button class="mdui-btn mdui-ripple" v-on:click="Ptype='member_illust';Pid=illust.user.id;parseApi('typeA')">
 							画师
 						</button>
-						<button class="mdui-btn mdui-ripple" v-on:click="Ptype='related';Pid=illust.id;phraseApi('typeA')">
+						<button class="mdui-btn mdui-ripple" v-on:click="Ptype='related';Pid=illust.id;parseApi('typeA')">
 							相关
 						</button>
 						<button class="mdui-btn mdui-btn-icon mdui-float-right">
@@ -341,7 +389,7 @@ var $$ = mdui.JQ;
 					</div>
 					<!-- 卡片的按钮 -->
 					<div class="mdui-card-actions">
-						<button class="mdui-btn mdui-ripple" v-on:click="Ptype='member_illust';Pid=user.user.id;phraseApi('typeA')">
+						<button class="mdui-btn mdui-ripple" v-on:click="Ptype='member_illust';Pid=user.user.id;parseApi('typeA')">
 							TA的作品
 						</button>
 						<button class="mdui-btn mdui-ripple">
@@ -356,8 +404,59 @@ var $$ = mdui.JQ;
 				</div>
 			</div>
 			<!---循环结束B-->
+			<!--历史记录-->
+			<div class="mdui-card history" v-if="showHistory">
+				<button onclick="app.localData=[];saveData();app.showHistory=false" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
+					清空历史记录
+				</button>
+				历史记录：升序排列
+				<button class="mdui-btn mdui-btn-icon mdui-btn-raised mdui-color-theme-accent mdui-float-right"
+				v-on:click="showHistory=false">
+					<i class="mdui-icon material-icons">
+						close
+					</i>
+				</button>
+				<div class="mdui-card-primary">
+					<div class="mdui-list" v-for="url in localData">
+						<a v-on:click="parseApi(null,url)" class="mdui-list-item mdui-ripple">
+							{{url}}
+						</a>
+					</div>
+				</div>
+			</div>
+			<!--设置-->
+			<div class="mdui-dialog" id="mySettings">
+				<div class="mdui-dialog-title">
+					设置
+				</div>
+				<div class="mdui-dialog-content">
+					<br>
+					<label class="mdui-radio">
+						<input type="radio" value="planA" v-model="picked" />
+						<i class="mdui-radio-icon">
+						</i>
+						自用代理
+					</label>
+					<br>
+					<label class="mdui-radio">
+						<input type="radio" value="planB" v-model="picked" />
+						<i class="mdui-radio-icon">
+						</i>
+						pixiv.cat代理
+					</label>
+				</div>
+				<div class="mdui-dialog-actions">
+					<button class="mdui-btn mdui-ripple" mdui-dialog-close>
+						取消
+					</button>
+					<button class="mdui-btn mdui-ripple" mdui-dialog-confirm>
+						确认
+					</button>
+				</div>
+			</div>
+			<!---底部导航栏-->
 			<div class="mdui-bottom-nav mdui-bottom-nav-text-auto mdui-bottom-nav-scroll-hide">
-				<a href="javascript:;" class="mdui-ripple mdui-bottom-nav-active">
+				<a href="javascript:app.showHistory=false;" class="mdui-ripple mdui-bottom-nav-active">
 					<i class="mdui-icon material-icons">
 						wallpaper
 					</i>
@@ -365,7 +464,7 @@ var $$ = mdui.JQ;
 						首页
 					</label>
 				</a>
-				<a href="javascript:;" class="mdui-ripple">
+				<a href="javascript:app.showHistory=!app.showHistory;" class="mdui-ripple">
 					<i class="mdui-icon material-icons">
 						visibility
 					</i>
@@ -373,7 +472,7 @@ var $$ = mdui.JQ;
 						历史
 					</label>
 				</a>
-				<a href="javascript:;" class="mdui-ripple">
+				<a href="javascript:void(0);" mdui-dialog="{target: '#mySettings'}" class="mdui-ripple">
 					<i class="mdui-icon material-icons">
 						tune
 					</i>
@@ -410,22 +509,27 @@ var $$ = mdui.JQ;
         PresponseC: '',
         Perror: '',
         mdui: '',
+        picked: 'planA',
+        loaclData: '',
         isPreview: false,
         isDisabled: true,
-        showTags: false
+        showHotTags: false,
+        showDetailTags: false,
+        showDetailMsg: false,
+        showHistory: false
     },
 
     methods: {
-        phraseApi: function(type) {
+        parseApi: function(type) {
             //错误处理
             if (app.Ppage < 1) app.Page = 1;
-            app.showTags=false;
+            app.showHotTags = false;
             var date = '';
             //判断输入type
             switch (type) {
                 case "typeA":
                     //若查询数组a
-                    if (typeof app.Ptype === "undefined") {
+                    if (app.Ptype.length == 0) {
                         mdui.alert("必须指定type!");
                         return false
                     }
@@ -433,7 +537,7 @@ var $$ = mdui.JQ;
                     break;
                 case "search":
                     //若搜索关键词
-                    if (typeof app.PmodeSearch === "undefined") {
+                    if (app.PmodeSearch == 0) {
                         mdui.alert("必须指定mode!");
                         return false
                     }
@@ -461,6 +565,10 @@ var $$ = mdui.JQ;
             if (typeof arguments[1] !== "undefined") {
                 app.Purl = arguments[1]
             }
+            //保存记录到cookies
+            //addCounter();
+            addData(app.Purl);
+            saveData();
             //弹出snackbar
             mdui.snackbar({
                 message: '查询中，切勿重复点击！',
@@ -469,8 +577,8 @@ var $$ = mdui.JQ;
             //获取数据
             axios.get(app.Purl)
                 .then(function(response) {
-                	//简单错误处理
-                if(JSON.stringify(response.data).length<38)mdui.alert("请求可能失败，或者为空<br>出错json：<br>"+JSON.stringify(response.data));
+                    //简单错误处理
+                    if (JSON.stringify(response.data).length < 38) mdui.alert("请求可能失败，或者为空<br />出错json：<br />" + JSON.stringify(response.data));
                     //判断type
                     var typeModeA = ['member_illust', 'favorite', 'related', 'rank', 'search'];
                     var typeModeB = ['following', 'follower'];
@@ -492,18 +600,24 @@ var $$ = mdui.JQ;
             //函数结束
         },
         getTags: function() {
-                if (app.showTags) {
-                    axios.get('https://api.imjad.cn/pixiv/v2/?type=tags')
-                        .then(function(response) {
-                            app.PresponseC = arrayAddProxy(response.data.trend_tags);
-                        })
-                        .catch(function(error) {
-                            console.log(error);
-                        }); //此方法尾部 
-                } else {
-                    app.PresponseC = '';
-                }
-            } //定义方法尾部
+            if (app.showHotTags) {
+                axios.get('https://api.imjad.cn/pixiv/v2/?type=tags')
+                    .then(function(response) {
+                        app.PresponseC = arrayAddProxy(response.data.trend_tags);
+                    })
+                    .catch(function(error) {
+                        console.log(error);
+                    }); //此方法尾部 
+            } else {
+                app.PresponseC = '';
+            }
+        },
+        clearResponse: function() {
+            app.PresponseA = '';
+            app.PresponseB = '';
+            app.PresponseC = '';
+            app.showHotTags = false;
+        }
     },
     watch: { //监控变量
         Ptype: function(nval, oval) {
@@ -516,7 +630,7 @@ var $$ = mdui.JQ;
         Purl: function(nval, oval) {
             app.PlastUrl = oval;
         },
-        showTags: function(nval, oval) {
+        showHotTags: function(nval, oval) {
             if (oval != nval) app.getTags();
         }
     }
@@ -524,9 +638,25 @@ var $$ = mdui.JQ;
 });
 
 app.mdui = mdui;
+if (Cookies.get("counter") === undefined) {
+    Cookies.set("counter", 0);
+    app.localData = [];
+} else {
+    app.localData = JSON.parse(Cookies.get("history"));
+}
 
 function arrayAddProxy(arr) { //给数组(对象)添加代理
-    url = JSON.stringify(arr).replace(/https:\/\/i.pximg/g, "http://pixiv.dns.navy/view.php/https://i.pximg");
+    switch (app.picked) {
+        case 'planA':
+            var url = JSON.stringify(arr).replace(/https:\/\/i.pximg/g, "http://pixiv.dns.navy/view.php/https://i.pximg");
+            break;
+
+        case 'planB':
+            var url = JSON.stringify(arr).replace(/i.pximg.net/g, "i.pixiv.cat");
+            break;
+        default:
+            var url = JSON.stringify(arr).replace(/i.pximg.net/g, "i.pixiv.cat");
+    }
     url = JSON.parse(url);
     return url;
 }
