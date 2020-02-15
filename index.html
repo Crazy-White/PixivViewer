@@ -34,7 +34,7 @@ var $$ = mdui.JQ;
 				上次请求: {{PlastUrl}}
 				<br>
 				<div class="-mdui-btn-group">
-					<button onclick="if(app.PlastUrl!=='')app.phraseApi(app.PlastUrl)" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
+					<button onclick="if(app.PlastUrl!=='')app.phraseApi(null,app.PlastUrl)" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
 						查询上次请求
 					</button>
 					<button v-on:click="PresponseA='';" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
@@ -98,7 +98,7 @@ var $$ = mdui.JQ;
 				<!--分割线-->
 				<br>
 				根据关键词查询：
-				<input v-model="Pkey" class="mdui-textfield-input" type="text" style="max-width:30%;display:inline"
+				<input v-model="Pkey" class="mdui-textfield-input" type="text" style="max-width:100px;display:inline"
 				placeholder="输入关键词...">
 				<select v-model="PmodeSearch" class="mdui-select" mdui-select>
 					<option value="" disabled>
@@ -152,7 +152,7 @@ var $$ = mdui.JQ;
 				<span>
 					日期(默认今天)
 				</span>
-				<input type="date" mix="2006-12-31" v-model="Pdate">
+				<input type="date" min="2006-12-31" v-model="Pdate">
 				<button class="mdui-btn mdui-btn-raised mdui-btn-icon mdui-color-theme-accent"
 				v-on:click="phraseApi('rank')">
 					<i class="mdui-icon material-icons">
@@ -171,7 +171,7 @@ var $$ = mdui.JQ;
 					</i>
 				</button>
 				<input v-model.number="Ppage" class="mdui-textfield-input" type="number"
-				style="max-width:15%;display:inline" placeholder="指定页">
+				style="max-width:50px;display:inline" placeholder="指定页">
 				<button v-on:click="Ppage += 1;phraseApi()" class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-ripple"
 				v-bind:disabled="isDisabled">
 					<i class="mdui-icon material-icons">
@@ -293,10 +293,10 @@ var $$ = mdui.JQ;
 					</div>
 					<!-- 卡片的按钮 -->
 					<div class="mdui-card-actions">
-						<button class="mdui-btn mdui-ripple" v-on:click="Ptype='member_illust';Pid=illust.user.id;phraseApi()">
+						<button class="mdui-btn mdui-ripple" v-on:click="Ptype='member_illust';Pid=illust.user.id;phraseApi('typeA')">
 							画师
 						</button>
-						<button class="mdui-btn mdui-ripple" v-on:click="Ptype='related';Pid=illust.id;phraseApi()">
+						<button class="mdui-btn mdui-ripple" v-on:click="Ptype='related';Pid=illust.id;phraseApi('typeA')">
 							相关
 						</button>
 						<button class="mdui-btn mdui-btn-icon mdui-float-right">
@@ -341,7 +341,7 @@ var $$ = mdui.JQ;
 					</div>
 					<!-- 卡片的按钮 -->
 					<div class="mdui-card-actions">
-						<button class="mdui-btn mdui-ripple" v-on:click="Ptype='member_illust';Pid=user.user.id;phraseApi()">
+						<button class="mdui-btn mdui-ripple" v-on:click="Ptype='member_illust';Pid=user.user.id;phraseApi('typeA')">
 							TA的作品
 						</button>
 						<button class="mdui-btn mdui-ripple">
