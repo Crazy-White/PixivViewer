@@ -55,7 +55,7 @@ function recovery() {
     app.clearResponse();
     app.isPreview = app.showHotTags = app.showDetailTags = app.showDetailMsg = false;
     app.Ppage = 1;
-    app.Purl = app.PlastUrl = '';
+    app.Purl = '';
     Cookies.remove("counter");
     Cookies.remove("history");
     app.localHistory = [];
@@ -73,21 +73,12 @@ function recovery() {
 	<body class="mdui-theme-primary-teal mdui-theme-accent-pink mdui-bottom-nav-fixed">
 		<div id="app" class="mdui-container">
 			<!--vue开始-->
-			<div class="config main-content mdui-shadow-2 mdui-p-a-1 mdui-m-t-1">
+			<div class="config main-content mdui-shadow-2 mdui-p-a-1 mdui-m-y-1">
 				请求api: {{Purl}}
 				<br />
-				上次请求: {{PlastUrl}}
-				<br />
 				<div class="-mdui-btn-group">
-					<button onclick="if(app.PlastUrl!=='')app.parseApi(null,app.PlastUrl)"
-					class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
-						查询上次请求
-					</button>
 					<button v-on:click="clearResponse()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
 						清空输出
-					</button>
-					<button v-on:click="PlastUrl='';" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
-						清空上次请求
 					</button>
 					<button onclick="recovery()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
 						变量初始化(出错时使用)
@@ -121,7 +112,7 @@ function recovery() {
 				<br />
 				根据id查询：
 				<input v-model.number="Pid" class="mdui-textfield-input" type="number"
-				style="max-width:50%;display:inline" placeholder="输入id...">
+				style="max-width:200px;display:inline" placeholder="输入id...">
 				<select v-model="Ptype" class="mdui-select" mdui-select>
 					<option value="" disabled>
 						调节模式
@@ -160,7 +151,7 @@ function recovery() {
 				<!--分割线-->
 				<br />
 				根据关键词查询：
-				<input v-model="Pkey" class="mdui-textfield-input" type="text" style="max-width:100px;display:inline"
+				<input v-model="Pkey" class="mdui-textfield-input" type="text" style="max-width:150px;display:inline"
 				placeholder="输入关键词...">
 				<select v-model="PmodeSearch" class="mdui-select" mdui-select>
 					<option value="" disabled>
@@ -174,6 +165,18 @@ function recovery() {
 					</option>
 					<option value="title_and_caption">
 						标题说明文
+					</option>
+				</select>
+				排序
+				<select v-model="Porder" class="mdui-select" mdui-select>
+					<option value="" disabled>
+						默认
+					</option>
+					<option value="date_desc">
+						按日期倒序
+					</option>
+					<option value="date_asc">
+						按日期正序
 					</option>
 				</select>
 				<button class="mdui-btn mdui-btn-icon mdui-btn-raised mdui-color-theme-accent"
@@ -431,7 +434,7 @@ function recovery() {
 					</div>
 				</div>
 				<div class="mdui-dialog-actions">
-					<button class="mdui-btn mdui-ripple" onclick="app.localHistory=[];saveData('history');">
+					<button class="mdui-btn mdui-ripple" onclick="app.localHistory=[];Cookies.set('history','[]');">
 						清空
 					</button>
 					<button class="mdui-btn mdui-ripple" mdui-dialog-close>
@@ -445,14 +448,21 @@ function recovery() {
 					设置
 				</div>
 				<div class="mdui-dialog-content">
-					<br>
+					<br />
 					<label class="mdui-radio">
 						<input type="radio" value="planA" v-model="picked" />
 						<i class="mdui-radio-icon">
 						</i>
 						自用代理
 					</label>
-					<br>
+					<br />
+					<label class="mdui-radio">
+						<input type="radio" value="planC" v-model="picked" />
+						<i class="mdui-radio-icon">
+						</i>
+						自用代理2
+					</label>
+					<br />
 					<label class="mdui-radio">
 						<input type="radio" value="planB" v-model="picked" />
 						<i class="mdui-radio-icon">
@@ -482,7 +492,7 @@ function recovery() {
 					</div>
 				</div>
 				<div class="mdui-dialog-actions">
-					<button class="mdui-btn mdui-ripple" onclick="app.localStar=[];saveData('star');">
+					<button class="mdui-btn mdui-ripple" onclick="app.localStar=[];Cookies.set('star','[]');">
 						清空
 					</button>
 					<button class="mdui-btn mdui-ripple" mdui-dialog-close>
@@ -508,20 +518,20 @@ function recovery() {
 						历史
 					</label>
 				</a>
-				<a href="javascript:void(0);" mdui-dialog="{target: '#mySettings'}" class="mdui-ripple">
-					<i class="mdui-icon material-icons">
-						tune
-					</i>
-					<label>
-						设置
-					</label>
-				</a>
 				<a href="javascript:void(0);" mdui-dialog="{target: '#myStar'}" class="mdui-ripple">
 					<i class="mdui-icon material-icons">
 						star
 					</i>
 					<label>
 						收藏
+					</label>
+				</a>
+				<a href="javascript:void(0);" mdui-dialog="{target: '#mySettings'}" class="mdui-ripple">
+					<i class="mdui-icon material-icons">
+						tune
+					</i>
+					<label>
+						设置
 					</label>
 				</a>
 			</div>
@@ -537,15 +547,15 @@ function recovery() {
         PmodeSearch: '',
         Ppage: 1,
         Pid: '16361124',
+        Porder: '',
         Pdate: '',
         Purl: '',
-        PlastUrl: '',
         PresponseA: '',
         PresponseB: '',
         PresponseC: '',
         Perror: '',
         mdui: '',
-        picked: 'planA',
+        picked: 'planB',
         localHistory: '',
         localStar: '',
         isPreview: false,
@@ -558,7 +568,10 @@ function recovery() {
     methods: {
         parseApi: function(type) {
             //错误处理
-            if (app.Ppage < 1) app.Page = 1;
+            if (app.Ppage < 1){
+ app.Ppage = 1;
+ return false;
+}
             app.showHotTags = false;
             var date = '';
             //判断输入type
@@ -578,7 +591,7 @@ function recovery() {
                         return false
                     }
                     app.Ptype = 'search';
-                    app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=search&mode=' + app.PmodeSearch + '&word=' + app.Pkey + '&page=' + app.Ppage;
+                    app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=search&mode=' + app.PmodeSearch + '&order=' + app.Porder + '&word=' + app.Pkey + '&page=' + app.Ppage;
                     break;
                 case "rank":
                     //若查询排行榜
@@ -590,9 +603,12 @@ function recovery() {
                     break;
                 default:
                     //默认，也就是翻页
-                    app.Purl += '&page=' + app.Ppage;
+                    if(app.Ptype === 'search'){
+                    app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=search&mode=' + app.PmodeSearch + '&order=' + app.Porder + '&word=' + app.Pkey + '&page=' + app.Ppage;
+            }else{
+            	app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid + '&page=' + app.Ppage;
             }
-
+}
             //清空原数据
             app.PresponseA = '';
             app.PresponseB = '';
@@ -615,6 +631,10 @@ function recovery() {
                 .then(function(response) {
                     //简单错误处理
                     if (JSON.stringify(response.data).length < 38) mdui.alert("请求可能失败，或者为空<br />出错json：<br />" + JSON.stringify(response.data));
+                    if (response.data.hasOwnProperty("error")) {
+                        app.Perror = response.data.error.message;
+                        mdui.alert(app.Perror);
+                    }
                     //判断type
                     var typeModeA = ['member_illust', 'favorite', 'related', 'rank', 'search'];
                     var typeModeB = ['following', 'follower'];
@@ -631,7 +651,7 @@ function recovery() {
                 //错误处理待定
                 .catch(function(error) {
                     app.Perror = error;
-                    mdui.alert(error);
+                    mdui.alert(app.Perror);
                 });
             //函数结束
         },
@@ -663,9 +683,6 @@ function recovery() {
                 app.isDisabled = true
             }
         },
-        Purl: function(nval, oval) {
-            app.PlastUrl = oval;
-        },
         showHotTags: function(nval, oval) {
             if (oval != nval) app.getTags();
         }
@@ -677,6 +694,8 @@ app.mdui = mdui;
 if (Cookies.get("counter") === undefined) {
     Cookies.set("counter", 0);
     app.localHistory = app.localStar = [];
+    Cookies.set("history", "[]");
+    Cookies.set("star", "[]");
 } else {
     app.localHistory = JSON.parse(Cookies.get("history"));
     app.localStar = JSON.parse(Cookies.get("star"));
@@ -691,6 +710,11 @@ function arrayAddProxy(arr) { //给数组(对象)添加代理
         case 'planB':
             var url = JSON.stringify(arr).replace(/i.pximg.net/g, "i.pixiv.cat");
             break;
+
+        case 'planC':
+            var url = JSON.stringify(arr).replace(/https:\/\/i.pximg/g, "http://i.kka.pub/PixivViewer/view.php/https://i.pximg");
+            break;
+
         default:
             var url = JSON.stringify(arr).replace(/i.pximg.net/g, "i.pixiv.cat");
     }
