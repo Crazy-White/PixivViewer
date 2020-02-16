@@ -568,10 +568,10 @@ function recovery() {
     methods: {
         parseApi: function(type) {
             //错误处理
-            if (app.Ppage < 1){
- app.Ppage = 1;
- return false;
-}
+            if (app.Ppage < 1) {
+                app.Ppage = 1;
+                return false;
+            }
             app.showHotTags = false;
             var date = '';
             //判断输入type
@@ -603,12 +603,12 @@ function recovery() {
                     break;
                 default:
                     //默认，也就是翻页
-                    if(app.Ptype === 'search'){
-                    app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=search&mode=' + app.PmodeSearch + '&order=' + app.Porder + '&word=' + app.Pkey + '&page=' + app.Ppage;
-            }else{
-            	app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid + '&page=' + app.Ppage;
+                    if (app.Ptype === 'search') {
+                        app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=search&mode=' + app.PmodeSearch + '&order=' + app.Porder + '&word=' + app.Pkey + '&page=' + app.Ppage;
+                    } else {
+                        app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid + '&page=' + app.Ppage;
+                    }
             }
-}
             //清空原数据
             app.PresponseA = '';
             app.PresponseB = '';
