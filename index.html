@@ -6,7 +6,7 @@
 		<title>
 			PixivViewer
 		</title>
-		<script src="src/vue.js">
+		<script src="src/vue.min.js">
 		</script>
 		<script src="src/vconsole.min.js">
 		</script>
@@ -442,6 +442,35 @@ function recovery() {
 					</button>
 				</div>
 			</div>
+			<!--收藏-->
+			<div class="mdui-dialog" id="myStar">
+				<div class="mdui-dialog-title">
+					收藏
+				</div>
+				<div class="mdui-dialog-content">
+					<div class="mdui-list" v-for="url in localStar">
+						<a v-on:click="parseApi(null,url)" class="mdui-list-item mdui-ripple">
+							{{url}}
+						</a>
+					</div>
+				</div>
+				<div class="mdui-dialog-actions">
+					<button class="mdui-btn mdui-ripple" mdui-dialog="{target: '#exportData'}"
+					mdui-dialog-confirm>
+						导出
+					</button>
+					<button class="mdui-btn mdui-ripple" mdui-dialog="{target: '#importData'}"
+					mdui-dialog-confirm>
+						导入
+					</button>
+					<button class="mdui-btn mdui-ripple" onclick="app.localStar=[];Cookies.set('star','[]');">
+						清空
+					</button>
+					<button class="mdui-btn mdui-ripple" mdui-dialog-close>
+						关闭
+					</button>
+				</div>
+			</div>
 			<!--设置-->
 			<div class="mdui-dialog" id="mySettings">
 				<div class="mdui-dialog-title">
@@ -479,21 +508,41 @@ function recovery() {
 					</button>
 				</div>
 			</div>
-			<!--收藏-->
-			<div class="mdui-dialog" id="myStar">
+			<!--导出-->
+			<div class="mdui-dialog" id="exportData">
 				<div class="mdui-dialog-title">
-					收藏
+					导出
 				</div>
 				<div class="mdui-dialog-content">
-					<div class="mdui-list" v-for="url in localStar">
-						<a v-on:click="parseApi(null,url)" class="mdui-list-item mdui-ripple">
-							{{url}}
-						</a>
+					<br />
+					<div class="mdui-textfield">
+						<textarea class="mdui-textfield-input" rows="6" placeholder="空" disabled>
+							{{JSON.stringify(localStar)}}
+						</textarea>
 					</div>
 				</div>
 				<div class="mdui-dialog-actions">
-					<button class="mdui-btn mdui-ripple" onclick="app.localStar=[];Cookies.set('star','[]');">
-						清空
+					<button class="mdui-btn mdui-ripple" mdui-dialog-close>
+						关闭
+					</button>
+				</div>
+			</div>
+			<!--导入-->
+			<div class="mdui-dialog" id="importData">
+				<div class="mdui-dialog-title">
+					导入
+				</div>
+				<div class="mdui-dialog-content">
+					<br />
+					<div class="mdui-textfield">
+						<textarea id="inputImport" class="mdui-textfield-input" rows="6" placeholder="输入文本...">
+						</textarea>
+					</div>
+				</div>
+				<div class="mdui-dialog-actions">
+					<button class="mdui-btn mdui-ripple" onclick="app.localStar=JSON.parse(document.getElementById('inputImport').value);saveData('star')"
+					mdui-dialog-confirm>
+						保存
 					</button>
 					<button class="mdui-btn mdui-ripple" mdui-dialog-close>
 						关闭
@@ -574,6 +623,8 @@ function recovery() {
             }
             app.showHotTags = false;
             var date = '';
+            var typeModeA = ['member_illust', 'favorite', 'related', 'rank', 'search'];
+            var typeModeB = ['following', 'follower'];
             //判断输入type
             switch (type) {
                 case "typeA":
@@ -582,6 +633,7 @@ function recovery() {
                         mdui.alert("必须指定type!");
                         return false
                     }
+                    if (typeModeB.indexOf(app.Ptype) === -1) app.Ppage = 1;
                     app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid + '&page=' + app.Ppage;
                     break;
                 case "search":
@@ -635,9 +687,7 @@ function recovery() {
                         app.Perror = response.data.error.message;
                         mdui.alert(app.Perror);
                     }
-                    //判断type
-                    var typeModeA = ['member_illust', 'favorite', 'related', 'rank', 'search'];
-                    var typeModeB = ['following', 'follower'];
+                    //判断type，数组在开头
                     if (typeModeA.indexOf(app.Ptype) !== -1) {
                         //设置代理,模式A
                         app.PresponseA = arrayAddProxy(response.data.illusts);
