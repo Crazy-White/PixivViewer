@@ -15,51 +15,45 @@
 		<link href="src/mdui/css/mdui.min.css" rel="stylesheet">
 		<script src="src/mdui/js/mdui.min.js">
 		</script>
-		<script src="src/js.cookie.min.js">
-		</script>
 		<script>
 			new VConsole();
 var $$ = mdui.JQ;
 
-function addCounter() {
-    Cookies.set("counter", Number(Cookies.get("counter")) + 1)
-}
-
-function removeStar(num) {
-    app.localStar.splice(num, 1);
-}
-
 function addHistory(data) {
-    app.localHistory.push(data)
+	app.localHistory.push(data);
+    localStorage.history=
+    JSON.stringify(app.localHistory);
 }
 
 function addStar(data) {
-    app.localStar.push(data);
-    saveData("star");
+	app.localStar.push(data);
+    localStorage.star=
+    JSON.stringify(app.localStar);
     mdui.snackbar({
         message: '收藏成功！',
         position: 'right-top'
     });
 }
 
-function saveData(method) {
-    if (method === "star") {
-        Cookies.set("star", JSON.stringify(app.localStar));
-    }
-    if (method === "history") {
-        Cookies.set("history", JSON.stringify(app.localHistory));
-    }
-}
 
 function recovery() {
     app.clearResponse();
     app.isPreview = app.showHotTags = app.showDetailTags = app.showDetailMsg = false;
     app.Ppage = 1;
     app.Purl = '';
-    Cookies.remove("counter");
-    Cookies.remove("history");
-    app.localHistory = [];
+    localStorage.clear();
     mdui.alert("完成!");
+}
+function parseUrl(url){
+    var obj = {};
+    var start = url.indexOf("?")+1;
+    var str = url.substr(start);
+    var arr = str.split("&");
+    for(var i = 0 ;i < arr.length;i++){
+          var arr2 = arr[i].split("=");
+           obj[arr2[0]] = arr2[1];
+    }
+return obj;
 }
 		</script>
 		<style>
@@ -74,45 +68,9 @@ function recovery() {
 		<div id="app" class="mdui-container">
 			<!--vue开始-->
 			<div class="config main-content mdui-shadow-2 mdui-p-a-1 mdui-m-y-1">
-				请求api: {{Purl}}
-				<br />
-				<div class="-mdui-btn-group">
-					<button v-on:click="clearResponse()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
-						清空输出
-					</button>
-					<button onclick="recovery()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
-						变量初始化(出错时使用)
-					</button>
-				</div>
-				<label class="mdui-checkbox">
-					<input type="checkbox" v-model="isPreview" />
-					<i class="mdui-checkbox-icon">
-					</i>
-					预览画师图片
-				</label>
-				<label class="mdui-checkbox">
-					<input type="checkbox" v-model="showHotTags" />
-					<i class="mdui-checkbox-icon">
-					</i>
-					查看热门标签
-				</label>
-				<br />
-				<label class="mdui-switch">
-					<input type="checkbox" v-model="showDetailMsg" />
-					<i class="mdui-switch-icon">
-					</i>
-				</label>
-				显示作品说明(图片右上角)
-				<label class="mdui-switch">
-					<input type="checkbox" v-model="showDetailTags" />
-					<i class="mdui-switch-icon">
-					</i>
-				</label>
-				显示作品标签
-				<br />
 				根据id查询：
 				<input v-model.number="Pid" class="mdui-textfield-input" type="number"
-				style="max-width:200px;display:inline" placeholder="输入id...">
+				style="max-width:100px;display:inline" placeholder="输入id...">
 				<select v-model="Ptype" class="mdui-select" mdui-select>
 					<option value="" disabled>
 						调节模式
@@ -151,7 +109,7 @@ function recovery() {
 				<!--分割线-->
 				<br />
 				根据关键词查询：
-				<input v-model="Pkey" class="mdui-textfield-input" type="text" style="max-width:150px;display:inline"
+				<input v-model="Pkey" class="mdui-textfield-input" type="text" style="max-width:100px;display:inline"
 				placeholder="输入关键词...">
 				<select v-model="PmodeSearch" class="mdui-select" mdui-select>
 					<option value="" disabled>
@@ -421,6 +379,56 @@ function recovery() {
 				</div>
 			</div>
 			<!---循环结束B-->
+<!---控制-->	
+				<div class="mdui-dialog" id="myControl">
+				<div class="mdui-dialog-title">
+					控制
+				</div>
+				<div class="mdui-dialog-content">
+					当前API：{{Purl}}
+					<div class="-mdui-btn-group">
+					<button v-on:click="clearResponse()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
+						清空输出
+					</button>
+					<button onclick="recovery()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
+						变量初始化(出错时使用)
+					</button>
+				</div>
+				<br />
+				<div class="mdui-divider"></div>
+				<label class="mdui-checkbox">
+					<input type="checkbox" v-model="isPreview" />
+					<i class="mdui-checkbox-icon">
+					</i>
+					预览画师图片
+				</label>
+				<label class="mdui-checkbox">
+					<input type="checkbox" v-model="showHotTags" />
+					<i class="mdui-checkbox-icon">
+					</i>
+					查看热门标签
+				</label>
+				<br />
+				<label class="mdui-switch">
+					<input type="checkbox" v-model="showDetailMsg" />
+					<i class="mdui-switch-icon">
+					</i>
+				</label>
+				显示作品说明(图片右上角)
+				<br />
+				<label class="mdui-switch">
+					<input type="checkbox" v-model="showDetailTags" />
+					<i class="mdui-switch-icon">
+					</i>
+				</label>
+				显示作品标签
+				</div>
+				<div class="mdui-dialog-actions">
+					<button class="mdui-btn mdui-ripple" mdui-dialog-close>
+						关闭
+					</button>
+				</div>
+			</div>
 			<!--历史记录-->
 			<div class="mdui-dialog" id="myHistory">
 				<div class="mdui-dialog-title">
@@ -434,7 +442,7 @@ function recovery() {
 					</div>
 				</div>
 				<div class="mdui-dialog-actions">
-					<button class="mdui-btn mdui-ripple" onclick="app.localHistory=[];Cookies.set('history','[]');">
+					<button class="mdui-btn mdui-ripple" onclick="localStorage.history='[]';app.localHistory=[];mdui.snackbar({message: '清除成功！',position: 'right-top'});">
 						清空
 					</button>
 					<button class="mdui-btn mdui-ripple" mdui-dialog-close>
@@ -463,7 +471,7 @@ function recovery() {
 					mdui-dialog-confirm>
 						导入
 					</button>
-					<button class="mdui-btn mdui-ripple" onclick="app.localStar=[];Cookies.set('star','[]');">
+					<button class="mdui-btn mdui-ripple" onclick="localStorage.star='[]';app.localStar=[];mdui.snackbar({message: '清除成功！',position: 'right-top'});">
 						清空
 					</button>
 					<button class="mdui-btn mdui-ripple" mdui-dialog-close>
@@ -477,7 +485,8 @@ function recovery() {
 					设置
 				</div>
 				<div class="mdui-dialog-content">
-					<br />
+					
+				<br />
 					<label class="mdui-radio">
 						<input type="radio" value="planA" v-model="picked" />
 						<i class="mdui-radio-icon">
@@ -501,10 +510,7 @@ function recovery() {
 				</div>
 				<div class="mdui-dialog-actions">
 					<button class="mdui-btn mdui-ripple" mdui-dialog-close>
-						取消
-					</button>
-					<button class="mdui-btn mdui-ripple" mdui-dialog-confirm>
-						确认
+					 关闭
 					</button>
 				</div>
 			</div>
@@ -517,7 +523,7 @@ function recovery() {
 					<br />
 					<div class="mdui-textfield">
 						<textarea class="mdui-textfield-input" rows="6" placeholder="空" disabled>
-							{{JSON.stringify(localStar)}}
+							{{localStar}}
 						</textarea>
 					</div>
 				</div>
@@ -540,7 +546,7 @@ function recovery() {
 					</div>
 				</div>
 				<div class="mdui-dialog-actions">
-					<button class="mdui-btn mdui-ripple" onclick="app.localStar=JSON.parse(document.getElementById('inputImport').value);saveData('star')"
+					<button class="mdui-btn mdui-ripple" onclick="localStorage.star=document.getElementById('inputImport').value;app.localStar=JSON.parse(localStorage.star)"
 					mdui-dialog-confirm>
 						保存
 					</button>
@@ -551,12 +557,12 @@ function recovery() {
 			</div>
 			<!---底部导航栏-->
 			<div class="mdui-bottom-nav mdui-bottom-nav-text-auto mdui-bottom-nav-scroll-hide">
-				<a href="javascript:;" class="mdui-ripple mdui-bottom-nav-active">
+				<a href="javascript:void(0);" mdui-dialog="{target: '#myControl'}" class="mdui-ripple mdui-bottom-nav-active">
 					<i class="mdui-icon material-icons">
 						wallpaper
 					</i>
 					<label>
-						首页
+						控制
 					</label>
 				</a>
 				<a href="javascript:void(0);" mdui-dialog="{target: '#myHistory'}" class="mdui-ripple">
@@ -585,6 +591,7 @@ function recovery() {
 				</a>
 			</div>
 			<!--vue结束-->
+				<button style="z-index:999" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent mdui-fab-hide" id="scrolltop" onclick="window.scroll({ top: 0, left: 0, behavior: 'smooth' })"><i class="mdui-icon material-icons">keyboard_arrow_up</i></button>
 		</div>
 		<script>
 			var app = new Vue({
@@ -604,9 +611,9 @@ function recovery() {
         PresponseC: '',
         Perror: '',
         mdui: '',
+        localStar: [],
+        localHistory: [],
         picked: 'planB',
-        localHistory: '',
-        localStar: '',
         isPreview: false,
         isDisabled: true,
         showHotTags: false,
@@ -666,13 +673,15 @@ function recovery() {
             app.PresponseB = '';
             //查询上次请求
 
-            if (typeof arguments[1] !== "undefined") {
-                app.Purl = arguments[1]
+            if (typeof arguments[1] !== "undefined") {//如果直接输入api
+            app.Purl = arguments[1];
+            app.Ptype  = parseUrl(app.Purl).type;
+            app.Pmode=parseUrl(app.Purl).mode;
+            app.Pid=parseUrl(app.Purl).id;
             }
-            //保存记录到cookies
-            //addCounter();
+            //保存记录到localStorage
             addHistory(app.Purl);
-            saveData('history');
+            location.assign("#"+app.Purl);
             //弹出snackbar
             mdui.snackbar({
                 message: '查询中，切勿重复点击！',
@@ -723,6 +732,7 @@ function recovery() {
             app.PresponseB = '';
             app.PresponseC = '';
             app.showHotTags = false;
+            mdui.snackbar({message: '成功！',position: 'right-top'});
         }
     },
     watch: { //监控变量
@@ -741,15 +751,19 @@ function recovery() {
 });
 
 app.mdui = mdui;
-if (Cookies.get("counter") === undefined) {
-    Cookies.set("counter", 0);
-    app.localHistory = app.localStar = [];
-    Cookies.set("history", "[]");
-    Cookies.set("star", "[]");
-} else {
-    app.localHistory = JSON.parse(Cookies.get("history"));
-    app.localStar = JSON.parse(Cookies.get("star"));
+
+if(localStorage.isFirst!=="not"){
+	localStorage.isFirst="not";
+	localStorage.star=localStorage.history='[]';
+	}
+if(localStorage==="not"){
+		app.localStar=JSON.parse(localStorage.star);
+        app.localHistory=JSON.parse(localStorage.history);
 }
+//刷新时从#后重载
+app.parseApi(null,location.hash.slice(1));
+//回到顶部
+window.onscroll=function(){20<document.body.scrollTop||20<document.documentElement.scrollTop?$$("#scrolltop").removeClass("mdui-fab-hide"):$$("#scrolltop").addClass("mdui-fab-hide")};
 
 function arrayAddProxy(arr) { //给数组(对象)添加代理
     switch (app.picked) {

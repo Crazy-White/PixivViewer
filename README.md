@@ -5,7 +5,6 @@ Code for fun :)
 + MDUI
 + vue
 + axios
-+ js-cookies
 ## TODO
 + fix many bugs
 + adjust UI
