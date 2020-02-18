@@ -8,4 +8,4 @@ Code for fun :)
 ## TODO
 + fix many bugs
 + adjust UI
-+ enable to view multipage illustrations
++ optimize logic
