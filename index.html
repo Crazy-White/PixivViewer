@@ -76,12 +76,12 @@
 					</a>
 					<div class="mdui-toolbar-spacer">
 					</div>
-					<a href="javascript:history.back;location.reload()" class="mdui-btn mdui-btn-icon">
+					<a href="javascript:history.back;" class="mdui-btn mdui-btn-icon">
 						<i class="mdui-icon material-icons">
 							keyboard_arrow_left
 						</i>
 					</a>
-					<a href="javascript:history.forward;location.reload()" class="mdui-btn mdui-btn-icon">
+					<a href="javascript:history.forward;" class="mdui-btn mdui-btn-icon">
 						<i class="mdui-icon material-icons">
 							keyboard_arrow_right
 						</i>
@@ -636,7 +636,7 @@
 				</div>
 			</div>
 			<!--错误-->
-			<div style="height:50px">
+			<div style="height:5px">
 			</div>
 			<div class="mdui-card" v-if="Perror">
 				<div class="mdui-card-media">
@@ -659,9 +659,7 @@
 				</div>
 			</div>
 			<!--空-->
-			<div style="height:50px">
-			</div>
-			<div class="mdui-card" v-if="!PresponseA||PresponseB||PresponseC">
+			<div class="mdui-card" v-if="!(PresponseA||PresponseB||PresponseC)">
 				<div class="mdui-card-media">
 					<img src="src/card.jpg" />
 					<div class="mdui-card-media-covered">
@@ -676,7 +674,7 @@
 					</div>
 				</div>
 				<div class="mdui-card-actions">
-					<button class="mdui-btn mdui-ripple" v-on:click="Perror=false">
+					<button class="mdui-btn mdui-ripple" v-on:click="PresponseC=true">
 						关闭
 					</button>
 				</div>
@@ -782,7 +780,7 @@
 						}
 						//保存记录到localStorage
 						if (app.Purl === "") return false;
-						addHistory(app.Purl);
+						try{addHistory(app.Purl);}catch{console.log("不支持localStorage")}
 						location.assign("#" + app.Purl);
 						//弹出snackbar
 						mdui.snackbar({
@@ -859,12 +857,16 @@
 					},
 					showHotTags: function(nval, oval) {
 						if (oval != nval) app.getTags();
+					},
+					picked: function(nval, oval) {
+						if (oval != nval) localStorage.picked=app.picked;
 					}
 				}
 
 			});
 
 			app.mdui = mdui;
+			try{app.picked=localStorage.picked;}catch{console.log("不支持localStorage")}
 			window.onload = function() {
 				//实例化抽屉
 				var leftDrawer = new mdui.Drawer('#left-drawer');
@@ -879,20 +881,8 @@
 				20 < document.body.scrollTop || 20 < document.documentElement.scrollTop ? $$("#scrolltop").removeClass("mdui-fab-hide") : $$("#scrolltop").addClass("mdui-fab-hide")
 			};
 
-			window.addEventListener('pageshow',
-			function(event) {
-				if (event.persisted) { // ios 有效, android 和 pc 每次都是 false 
-					location.reload();
-				} else { // ios 除外 
-					if (sessionStorage.getItem('refresh') === 'true') {
-						location.reload();
-					}
-				}
-				sessionStorage.removeItem('refresh');
-			});
-
 			function arrayAddProxy(arr) { //给数组(对象)添加代理
-				switch (app.picked) {
+				switch (app.Picked) {
 				case 'planA':
 					var url = JSON.stringify(arr).replace(/https:\/\/i.pximg/g, "http://pixiv.dns.navy/view.php/https://i.pximg");
 					break;
