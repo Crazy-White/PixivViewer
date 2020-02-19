@@ -866,7 +866,7 @@
 			});
 
 			app.mdui = mdui;
-			try{app.picked=localStorage.picked;}catch{console.log("不支持localStorage")}
+			try{app.picked=localStorage.picked;app.localHistory=JSON.parse(localStorage.history);app.localStar=JSON.parse(localStorage.star)}catch{console.log("不支持localStorage")}
 			window.onload = function() {
 				//实例化抽屉
 				var leftDrawer = new mdui.Drawer('#left-drawer');
