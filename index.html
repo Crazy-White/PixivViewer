@@ -780,8 +780,12 @@
 						}
 						//保存记录到localStorage
 						if (app.Purl === "") return false;
-						try{addHistory(app.Purl);}catch{console.log("不支持localStorage")}
-						location.assign("#" + app.Purl);
+						try {
+							addHistory(app.Purl);
+							location.assign("#" + app.Purl);
+						} catch {
+							console.log("不支持localStorage")
+						}
 						//弹出snackbar
 						mdui.snackbar({
 							message: '查询中，切勿重复点击！',
@@ -859,17 +863,23 @@
 						if (oval != nval) app.getTags();
 					},
 					picked: function(nval, oval) {
-						if (oval != nval) localStorage.picked=app.picked;
+						if (oval != nval) localStorage.picked = app.picked;
 					}
 				}
 
 			});
 
 			app.mdui = mdui;
-			try{app.picked=localStorage.picked;app.localHistory=JSON.parse(localStorage.history);app.localStar=JSON.parse(localStorage.star)}catch{console.log("不支持localStorage")}
+			try {
+				app.picked = localStorage.picked;
+				app.localHistory = JSON.parse(localStorage.history);
+				app.localStar = JSON.parse(localStorage.star)
+			} catch {
+				console.log("不支持localStorage")
+			}
 			window.onload = function() {
 				//实例化抽屉
-				var leftDrawer = new mdui.Drawer('#left-drawer');
+				window.leftDrawer = new mdui.Drawer('#left-drawer');
 				leftDrawer.open();
 				if (location.href.lastIndexOf("#") > -1) leftDrawer.close();
 			}
@@ -901,6 +911,17 @@
 				url = JSON.parse(url);
 				return url;
 			}
+		</script>
+		<script>
+			var _mtac = {}; (function() {
+				var mta = document.createElement("script");
+				mta.src = "//pingjs.qq.com/h5/stats.js?v2.0.4";
+				mta.setAttribute("name", "MTAH5");
+				mta.setAttribute("sid", "500711490");
+
+				var s = document.getElementsByTagName("script")[0];
+				s.parentNode.insertBefore(mta, s);
+			})();
 		</script>
 	</body>
 
