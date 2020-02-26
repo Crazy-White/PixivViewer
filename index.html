@@ -366,6 +366,9 @@
 							<button class="mdui-btn mdui-ripple" v-on:click="Ptype='related';Pid=illust.id;parseApi('typeA')">
 								相关
 							</button>
+							<button class="mdui-btn mdui-ripple" v-on:click="Ptype='illust';Pid=illust.id;parseApi('typeA')">
+								原图
+							</button>
 							<button class="mdui-btn mdui-btn-icon mdui-float-right" onclick="addStar(app.Purl)">
 								<i class="mdui-icon material-icons">
 									star
@@ -813,16 +816,18 @@
 								var illust = arrayAddProxy(response.data.illust);
 								var content;
 								content = '<img src="' + illust.meta_single_page.original_image_url + '">';
-								for (page in illust.meta_pages) {
-									content += '<img src="' + page.image_urls.original + '">';
+								for (let o = 0; o < illust.meta_pages.length; o++) {
+									content += '<img src="' + illust.meta_pages[o].image_urls.original + '">';
 								}
-								mdui.alert("<h1>" + illust.title + "</h1>" + "画师：" + illust.user.name + "|" + illust.user.id + content); //尾部
+								mdui.alert("<h1>" + illust.title + "</h1>" + "画师：" + illust.user.name + "|" + illust.user.id + content + "<div style='height:200px'></div>"); //尾部
 							}
 							//结束
+							leftDrawer.close();
 						})
 						//错误处理待定
 						.
 						catch(function(error) {
+							leftDrawer.open();
 							app.Perror = error;
 							mdui.alert(app.Perror);
 						});
