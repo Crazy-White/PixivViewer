@@ -8,6 +8,7 @@ Code for fun :)
 + MDUI
 + vue
 + axios
++ vue-lazyload
 ## TODO
 + fix many bugs
 + adjust UI

@@ -6,16 +6,16 @@
 		<title>
 			PixivViewer
 		</title>
-		<script src="src/vue.min.js">
+		<script src="./src/vue.min.js">
 		</script>
-		<script src="src/vue-lazyload.js">
+		<script src="./src/vue-lazyload.js">
 		</script>
-		<script src="src/vconsole.min.js">
+		<script src="./src/vconsole.min.js">
 		</script>
-		<script src="src/axios.min.js">
+		<script src="./src/axios.min.js">
 		</script>
-		<link href="src/mdui/css/mdui.min.css" rel="stylesheet">
-		<script src="src/mdui/js/mdui.min.js">
+		<link href="./src/mdui/css/mdui.min.css" rel="stylesheet">
+		<script src="./src/mdui/js/mdui.min.js">
 		</script>
 		<script>
 			new VConsole();
@@ -98,7 +98,7 @@ function Bool(val) {
 			</div>
 			<!--上面导航栏-->
 			<div class="mdui-drawer" id="left-drawer">
-				<img src="src/logo.png" />
+				<img src="./src/logo.png" />
 				<div class="config main-content mdui-shadow-2 mdui-p-a-1 mdui-m-y-1">
 					根据id查询：
 					<br />
@@ -557,14 +557,14 @@ function Bool(val) {
 						</label>
 						<br />
 						<label class="mdui-radio">
-							<input type="radio" value="planA" v-model="picked" />
+							<input type="radio" value="planC" v-model="picked" />
 							<i class="mdui-radio-icon">
 							</i>
 							自用代理
 						</label>
 						<br />
 						<label class="mdui-radio">
-							<input type="radio" value="planC" v-model="picked" />
+							<input type="radio" value="planD" v-model="picked" />
 							<i class="mdui-radio-icon">
 							</i>
 							自用代理2
@@ -659,7 +659,7 @@ function Bool(val) {
 			</div>
 			<div class="mdui-card" v-if="Perror">
 				<div class="mdui-card-media">
-					<img src="src/card.jpg" />
+					<img src="./src/card.jpg" />
 					<div class="mdui-card-media-covered">
 						<div class="mdui-card-primary">
 							<div class="mdui-card-primary-title">
@@ -680,7 +680,7 @@ function Bool(val) {
 			<!--空-->
 			<div class="mdui-card" v-if="!(PresponseA||PresponseB||PresponseC)">
 				<div class="mdui-card-media">
-					<img src="src/card.jpg" />
+					<img src="./src/card.jpg" />
 					<div class="mdui-card-media-covered">
 						<div class="mdui-card-primary">
 							<div class="mdui-card-primary-title">
@@ -709,8 +709,8 @@ function Bool(val) {
 		<script>
 			Vue.use(VueLazyload, {
     preLoad: 1.4,
-    error: 'src/card.jpg',
-    loading: 'src/loading.gif',
+    error: './src/card.jpg',
+    loading: './src/loading.gif',
     attempt: 1,
     listenEvents: ['scroll']
 })
@@ -923,9 +923,9 @@ try { //恢复上次设置
 </p>
 `,
             buttons: [{
-                text: '确认',
+                text: '了解',
                 onClick: function(inst) {
-                    //点击了确定
+                    window.open("./")
                 }
             }]
         });
@@ -937,21 +937,24 @@ try { //恢复上次设置
         app.showDetailTags = Bool(localStorage.showDetailTags);
         app.showDetailMsg = Bool(localStorage.showDetailMsg);
         app.localHistory = JSON.parse(localStorage.history);
-        app.localStar = JSON.parse(localStorage.star);
+        if(localStorage.star)app.localStar = JSON.parse(localStorage.star);
     }
 } catch (e) { //可以本地运行
     console.log("可能不支持localStorage");
     console.error(e)
 }
+
 window.onload = function() {
     //实例化抽屉
     window.leftDrawer = new mdui.Drawer('#left-drawer');
     leftDrawer.open();
-    if (location.href.lastIndexOf("#") > -1) leftDrawer.close();
+    if (location.href.lastIndexOf("#") > -1 && !location.href.includes("#mdui-dialog")) {
+        leftDrawer.close();
+        //刷新时从#后重载
+        app.parseApi(null, location.hash.slice(1));
+    }
 }
 
-//刷新时从#后重载
-app.parseApi(null, location.hash.slice(1));
 //回到顶部
 window.onscroll = function() {
     20 < document.body.scrollTop || 20 < document.documentElement.scrollTop ? $$("#scrolltop").removeClass("mdui-fab-hide") : $$("#scrolltop").addClass("mdui-fab-hide")
