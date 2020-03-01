@@ -6,7 +6,7 @@
 		<title>
 			PixivViewer
 		</title>
-		<script src="./src/vue.min.js">
+		<script src="./src/vue.js">
 		</script>
 		<script src="./src/vue-lazyload.js">
 		</script>
@@ -15,11 +15,11 @@
 		<script src="./src/axios.min.js">
 		</script>
 		<link href="./src/mdui/css/mdui.min.css" rel="stylesheet">
+		<link href="./src/flex.css" rel="stylesheet">
 		<script src="./src/mdui/js/mdui.min.js">
 		</script>
 		<script>
 			new VConsole();
-var $$ = mdui.JQ;
 
 function addHistory(data) {
     app.localHistory.push(data);
@@ -268,11 +268,11 @@ function Bool(val) {
 					</span>
 				</div>
 				<!---循环开始A-->
-				<div v-for="illust in PresponseA">
-					<div class="mdui-card">
+				<div class="columns">
+					<div class="mdui-card column col-6 col-sm-12 col-xs-12" v-for="illust in PresponseA">
 						<!-- 卡片头部，包含头像、标题、副标题 -->
 						<div class="mdui-card-header">
-							<img class="mdui-card-header-avatar" :src="illust.user.profile_image_urls.medium"
+							<img class="mdui-card-header-avatar" v-lazy="illust.user.profile_image_urls.medium"
 							/>
 							<div class="mdui-card-header-title">
 								{{illust.user.name}}
@@ -283,7 +283,9 @@ function Bool(val) {
 						</div>
 						<!-- 卡片的媒体内容，可以包含图片、视频等媒体内容，以及标题、副标题 -->
 						<div class="mdui-card-media">
-							<img v-lazy="illust.image_urls.large" />
+							<img v-lazy="illust.image_urls[Pquality]">
+							
+								
 							<!-- 卡片中可以包含一个或多个菜单按钮 -->
 							<div class="mdui-card-menu" v-if="showDetailMsg">
 								<button class="mdui-btn mdui-btn-icon mdui-text-color-white" v-on:click='mdui.alert(illust.caption+"<br /><br />原图"+illust.meta_single_page.original_image_url, "细节")'>
@@ -387,11 +389,11 @@ function Bool(val) {
 				</div>
 				<!--循环结束A--->
 				<!---循环开始B-->
-				<div v-for="user in PresponseB">
-					<div class="mdui-card">
+				<div class="mdui-row-xs-1 mdui-row-sm-2 mdui-row-md-3 mdui-row-lg-4 mdui-row-xl-5 mdui-grid-list">
+					<div class="mdui-card mdui-col" v-for="user in PresponseB">
 						<!-- 卡片头部，包含头像、标题、副标题 -->
 						<div class="mdui-card-header">
-							<img class="mdui-card-header-avatar" :src="user.user.profile_image_urls.medium"
+							<img class="mdui-card-header-avatar" v-lazy="user.user.profile_image_urls.medium"
 							/>
 							<div class="mdui-card-header-title">
 								{{user.user.name}}
@@ -405,7 +407,7 @@ function Bool(val) {
 							<!----嵌套卡片-->
 							<div class="mdui-card" v-for="illust in user.illusts">
 								<div class="mdui-card-media">
-									<img v-lazy="illust.image_urls.large" />
+									<img v-lazy="illust.image_urls[Pquality]" />
 								</div>
 								<div class="mdui-card-primary">
 									<div class="mdui-card-primary-title">
@@ -423,7 +425,7 @@ function Bool(val) {
 								TA的作品
 							</button>
 							<button class="mdui-btn mdui-ripple">
-								无效按钮
+								详细(没写)
 							</button>
 							<button class="mdui-btn mdui-btn-icon mdui-float-right" onclick="addStar(app.Purl)">
 								<i class="mdui-icon material-icons">
@@ -542,6 +544,28 @@ function Bool(val) {
 					</div>
 					<div class="mdui-dialog-content">
 						<br />
+						<label class="mdui-radio">
+							<input type="radio" value="large" v-model="Pquality" />
+							<i class="mdui-radio-icon">
+							</i>
+							清晰
+						</label>
+						<br />
+						<label class="mdui-radio">
+							<input type="radio" value="medium" v-model="Pquality" />
+							<i class="mdui-radio-icon">
+							</i>
+							不清晰
+						</label>
+						<br />
+						<label class="mdui-radio">
+							<input type="radio" value="square_medium" v-model="Pquality" />
+							<i class="mdui-radio-icon">
+							</i>
+							最不清晰
+						</label>
+						<div class="mdui-divider"></div>
+						
 						<label class="mdui-radio">
 							<input type="radio" value="planA" v-model="picked" />
 							<i class="mdui-radio-icon">
@@ -699,16 +723,16 @@ function Bool(val) {
 				</div>
 			</div>
 			<!--vue结束-->
-			<button style="z-index:999" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent mdui-fab-hide"
+			<!--button style="z-index:999" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent mdui-fab-hide"
 			id="scrolltop" onclick="window.scroll({ top: 0, left: 0, behavior: 'smooth' })">
 				<i class="mdui-icon material-icons">
 					keyboard_arrow_up
 				</i>
-			</button>
+			</button-->
 		</div>
 		<script>
 			Vue.use(VueLazyload, {
-    preLoad: 1.4,
+    preLoad: 1.8,
     error: './src/card.jpg',
     loading: './src/loading.gif',
     attempt: 1,
@@ -727,6 +751,7 @@ var app = new Vue({
         Porder: '',
         Pdate: '',
         Purl: '',
+        Pquality: 'medium',
         PresponseA: '',
         PresponseB: '',
         PresponseC: '',
@@ -757,7 +782,7 @@ var app = new Vue({
             switch (type) {
                 case "typeA":
                     //若查询数组a
-                    if (app.Ptype === undefined) {
+                    if (!app.Ptype.length) {
                         mdui.alert("必须指定type!");
                         return false
                     }
@@ -850,8 +875,8 @@ var app = new Vue({
                     leftDrawer.close();
                 })
                 //错误处理待定
-                .
-            catch(function(error) {
+                
+            .catch(function(error) {
                 leftDrawer.open();
                 app.Perror = error;
                 mdui.alert(app.Perror);
@@ -895,6 +920,9 @@ var app = new Vue({
         picked: function(nval, oval) {
             if (oval != nval) localStorage.picked = app.picked;
         },
+        Pquality: function(nval, oval) {
+            if (oval != nval) localStorage.Pquality = app.Pquality;
+        },
         isPreview: function(nval, oval) {
             if (oval != nval) localStorage.isPreview = app.isPreview;
         },
@@ -912,6 +940,7 @@ var app = new Vue({
 app.mdui = mdui;
 try { //恢复上次设置
     if (typeof localStorage.isFirst === "undefined") {
+    	localStorage.Pquality="medium";
         mdui.dialog({
             title: '使用说明',
             content: `<p>
@@ -920,19 +949,18 @@ try { //恢复上次设置
 主要使用Vue和MDUI框架</p>
 <p>打开侧边栏<i class="mdui-icon material-icons">menu</i>进行查询，查询完毕后，侧边栏自动关闭<br />
 底部按钮<i class="mdui-icon material-icons">wallpaper</i><i class="mdui-icon material-icons">visibility</i><i class="mdui-icon material-icons">star</i><i class="mdui-icon material-icons">tune</i>可进行设置<br />若图片无法加载，请修改<i class="mdui-icon material-icons">tune</i><strong>并刷新</strong>
-</p>
-`,
+</p>`,
             buttons: [{
                 text: '了解',
                 onClick: function(inst) {
-                    window.open("./")
+                    location.hash=''
                 }
             }]
         });
-
         localStorage.isFirst = "no"
     } else {
         app.picked = localStorage.picked;
+        app.Pquality = localStorage.Pquality;
         app.isPreview = Bool(localStorage.isPreview);
         app.showDetailTags = Bool(localStorage.showDetailTags);
         app.showDetailMsg = Bool(localStorage.showDetailMsg);
@@ -948,7 +976,7 @@ window.onload = function() {
     //实例化抽屉
     window.leftDrawer = new mdui.Drawer('#left-drawer');
     leftDrawer.open();
-    if (location.href.lastIndexOf("#") > -1 && !location.href.includes("#mdui-dialog")) {
+    if (location.href.lastIndexOf("#") > -1 && !location.href.includes("#mdui-dialog") && location.hash.length>7) {
         leftDrawer.close();
         //刷新时从#后重载
         app.parseApi(null, location.hash.slice(1));
