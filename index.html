@@ -1,1030 +1,683 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width,initial-scale=1" />
-		<title>
-			PixivViewer
-		</title>
-		<script src="./src/vue.js">
-		</script>
-		<script src="./src/vue-lazyload.js">
-		</script>
-		<script src="./src/vconsole.min.js">
-		</script>
-		<script src="./src/axios.min.js">
-		</script>
-		<link href="./src/mdui/css/mdui.min.css" rel="stylesheet">
-		<link href="./src/flex.css" rel="stylesheet">
-		<script src="./src/mdui/js/mdui.min.js">
-		</script>
-		<script>
-			new VConsole();
 
-function addHistory(data) {
-    app.localHistory.push(data);
-    localStorage.history = JSON.stringify(app.localHistory);
-}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>
+        PixivViewer
+    </title>
+    <script src="./src/vue.js"></script>
+    <script src="./src/vue-lazyload.js"></script>
+    <script src="./src/vconsole.min.js"></script>
+    <script src="./src/axios.min.js"></script>
+    <script src="./src/mdui/js/mdui.min.js"></script>
+    <link href="./src/mdui/css/mdui.min.css" rel="stylesheet" />
+    <link href="./src/flex.css" rel="stylesheet" />
+</head>
 
-function addStar(data) {
-    app.localStar.push(data);
-    localStorage.star = JSON.stringify(app.localStar);
-    mdui.snackbar({
-        message: '收藏成功！',
-        position: 'right-top'
-    });
-}
+<body class="mdui-theme-primary-teal mdui-theme-accent-pink mdui-appbar-with-toolbar mdui-drawer-body-left mdui-bottom-nav-fixed">
+    <!--加载框-->
+    <div class="mdui-dialog" id="loading-box">
+        <div class="mdui-dialog-content">
+            <div class="mdui-spinner mdui-spinner-colorful"></div>&nbsp;&nbsp;&nbsp;加载中……
+        </div>
+    </div>
 
-function recovery() {
-    app.clearResponse();
-    app.isPreview = app.showHotTags = app.showDetailTags = app.showDetailMsg = false;
-    app.Ppage = 1;
-    app.Purl = '';
-    localStorage.clear();
-    mdui.alert("完成!");
-}
-
-function parseUrl(url) {
-    var obj = {};
-    var start = url.indexOf("?") + 1;
-    var str = url.substr(start);
-    var arr = str.split("&");
-    for (var i = 0; i < arr.length; i++) {
-        var arr2 = arr[i].split("=");
-        obj[arr2[0]] = arr2[1];
-    }
-    return obj;
-}
-
-function Bool(val) {
-    if (val === "false" || val === "0" || val === 0) return false;
-    if (val === "true" || val === "1" || val === 1) return true
-}
-		</script>
-		<style>
-			img{ max-width:100% } .config button{margin-bottom:2px}.show{display:inline}.hide{display:none}
-			.main-content{white-space: nowrap;overflow: scroll} .mdui-card{margin-bottom:2px}
-			.main-preview{justify-content:space-between;display:flex}.main-preview>.mdui-card{width:50%}
-			input[type=date]{width:80px;position:relative;display:inline-block;max-width:100%;height:36px;-webkit-box-sizing:border-box;box-sizing:border-box;-webkit-appearance:none;padding-right:24px;padding-left:0;font-family:Roboto,Noto,Helvetica,Arial,sans-serif;font-size:16px;vertical-align:middle;cursor:pointer;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;background-image:url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%2010%2010%22%3E%3Cpath%20d%3D%22m-0.00254%2C2.5l5%2C5l5%2C-5l-10%2C0z%22%20fill%3D%22%23000000%22%20opacity%3D%220.54%22%2F%3E%3C%2Fsvg%3E%0A);background-repeat:no-repeat;background-position:right
-			center;border:none;border-bottom:1px solid rgba(0,0,0,.12);outline:0;-webkit-transition-timing-function:cubic-bezier(.4,0,.2,1);transition-timing-function:cubic-bezier(.4,0,.2,1);-webkit-transition-duration:.2s;transition-duration:.2s;-webkit-transition-property:background-color,background-position-x,-webkit-box-shadow;transition-property:background-color,background-position-x,-webkit-box-shadow;transition-property:background-color,box-shadow,background-position-x;transition-property:background-color,box-shadow,background-position-x,-webkit-box-shadow;-moz-appearance:none;appearance:none;will-change:background-color,box-shadow,background-position-x}
-		</style>
-	</head>
-	<body class="mdui-theme-primary-teal mdui-theme-accent-pink mdui-appbar-with-toolbar mdui-drawer-body-left mdui-bottom-nav-fixed">
-		<div id="app">
-			<!--vue开始-->
-			<div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-toolbar-hide">
-				<div class="mdui-toolbar mdui-color-theme">
-					<a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-drawer="{target: '#left-drawer'}">
-						<i class="mdui-icon material-icons">
+    <div id="app">
+        <!--vue开始-->
+        <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-toolbar-hide">
+            <div class="mdui-toolbar mdui-color-theme">
+                <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-drawer="{target: '#left-drawer'}">
+                    <i class="mdui-icon material-icons">
 							menu
 						</i>
-					</a>
-					<a href="javascript:location.assign('#top');" class="mdui-typo-headline">
+                </a>
+                <a href="javascript:location.assign('#top');" class="mdui-typo-headline">
 						PixivViewer
 					</a>
-					<div class="mdui-toolbar-spacer">
-					</div>
-					<a href="javascript:history.back();mdui.alert('现在刷新即可查看上一页')" class="mdui-btn mdui-btn-icon">
-						<i class="mdui-icon material-icons">
+                <div class="mdui-toolbar-spacer">
+                </div>
+                <a href="javascript:history.back();mdui.alert('现在刷新即可查看上一页')" class="mdui-btn mdui-btn-icon">
+                    <i class="mdui-icon material-icons">
 							keyboard_arrow_left
 						</i>
-					</a>
-					<a href="javascript:history.forward();mdui.alert('现在刷新即可查看下一页')" class="mdui-btn mdui-btn-icon">
-						<i class="mdui-icon material-icons">
+                </a>
+                <a href="javascript:history.forward();mdui.alert('现在刷新即可查看下一页')" class="mdui-btn mdui-btn-icon">
+                    <i class="mdui-icon material-icons">
 							keyboard_arrow_right
 						</i>
-					</a>
-				</div>
-			</div>
-			<!--上面导航栏-->
-			<div class="mdui-drawer" id="left-drawer">
-				<img src="./src/logo.png" />
-				<div class="config main-content mdui-shadow-2 mdui-p-a-1 mdui-m-y-1">
-					根据id查询：
-					<br />
-					<input v-model.number="Pid" class="mdui-textfield-input" type="number"
-					style="max-width:100px;display:inline" placeholder="输入id...">
-					<select v-model="Ptype" class="mdui-select" mdui-select>
-						<option value="" disabled>
-							调节模式
-						</option>
-						<option value="illust">
-							作品详情
-						</option>
-						<option value="member" disabled>
-							用户详情
-						</option>
-						<option value="member_illust">
-							用户作品
-						</option>
-						<option value="favorite">
-							用户收藏
-						</option>
-						<option value="following">
-							用户关注
-						</option>
-						<option value="follower">
-							用户粉丝
-						</option>
-						<option value="tags">
-							热门标签
-						</option>
-						<option value="related">
-							相关作品
-						</option>
-					</select>
-					<button class="mdui-btn mdui-btn-icon mdui-btn-raised mdui-color-theme-accent"
-					v-on:click="parseApi('typeA')">
-						<i class="mdui-icon material-icons">
+                </a>
+            </div>
+        </div>
+        <!--上面导航栏-->
+        <div class="mdui-drawer" id="left-drawer">
+            <a href="./"><img src="./src/logo.png" /></a>
+            <div class="config">
+                <div class="mdui-tab" mdui-tab>
+                    <a href="#example1-tab1" class="mdui-ripple">查询id</a>
+                    <a href="#example1-tab2" class="mdui-ripple">查询关键词</a>
+                    <a href="#example1-tab3" class="mdui-ripple">查询排行榜</a>
+                </div>
+                <div id="example1-tab1" class="mdui-p-a-2">
+                    <input v-model.number="Pid" class="mdui-textfield-input" type="number" placeholder="输入id...">
+
+                    <select v-model="Ptype" class="mdui-select" mdui-select>
+                        <option value="" disabled>
+                            调节模式
+                        </option>
+                        <option value="illust">
+                            作品详情
+                        </option>
+                        <option value="member">
+                            用户详情
+                        </option>
+                        <option value="member_illust">
+                            用户作品
+                        </option>
+                        <option value="favorite">
+                            用户收藏
+                        </option>
+                        <option value="following">
+                            用户关注
+                        </option>
+                        <option value="follower">
+                            用户粉丝
+                        </option>
+                        <option value="tags">
+                            热门标签
+                        </option>
+                        <option value="related">
+                            相关作品
+                        </option>
+                    </select>&nbsp;
+                    <button class="mdui-btn mdui-btn-icon mdui-btn-raised mdui-color-theme-accent" v-on:click="parseApi('typeA')">
+                        <i class="mdui-icon material-icons">
 							search
 						</i>
-					</button>
-					<!--分割线-->
-					<br />
-					<br />
-					根据关键词查询：
-					<br />
-					<input v-model="Pkey" class="mdui-textfield-input" type="text" style="max-width:100px;display:inline"
-					placeholder="输入关键词...">
-					<select v-model="PmodeSearch" class="mdui-select" mdui-select>
-						<option value="" disabled>
-							调节模式
-						</option>
-						<option value="partial_match_for_tags">
-							标签部分一致
-						</option>
-						<option value="exact_match_for_tags">
-							标签完全一致
-						</option>
-						<option value="title_and_caption">
-							标题说明文
-						</option>
-					</select>
-					<br />
-					排序
-					<select v-model="Porder" class="mdui-select" mdui-select>
-						<option value="" disabled>
-							默认
-						</option>
-						<option value="date_desc">
-							按日期倒序
-						</option>
-						<option value="date_asc">
-							按日期正序
-						</option>
-					</select>
-					<button class="mdui-btn mdui-btn-icon mdui-btn-raised mdui-color-theme-accent"
-					v-on:click="parseApi('search')">
-						<i class="mdui-icon material-icons">
+                    </button>
+                </div>
+                <div id="example1-tab2" class="mdui-p-a-2">
+                    <input v-model="Pkey" class="mdui-textfield-input" type="text" placeholder="输入关键词...">
+                    <select v-model="PmodeSearch" class="mdui-select" mdui-select>
+                        <option value="" disabled>
+                            调节模式
+                        </option>
+                        <option value="partial_match_for_tags">
+                            标签部分一致
+                        </option>
+                        <option value="exact_match_for_tags">
+                            标签完全一致
+                        </option>
+                        <option value="title_and_caption">
+                            标题说明文
+                        </option>
+                    </select>
+                    <select v-model="Porder" class="mdui-select" mdui-select>
+                        <option value="" disabled>
+                            默认
+                        </option>
+                        <option value="date_desc">
+                            按日期倒序
+                        </option>
+                        <option value="date_asc">
+                            按日期正序
+                        </option>
+                    </select>
+                    <button class="mdui-btn mdui-btn-icon mdui-btn-raised mdui-color-theme-accent" v-on:click="parseApi('search')">
+                        <i class="mdui-icon material-icons">
 							search
 						</i>
-					</button>
-					<br />
-					<br />
-					<!--分割线-->
-					查询排行榜：
-					<br />
-					<select v-model="PmodeRank" class="mdui-select" mdui-select>
-						<option value="" disabled>
-							默认
-						</option>
-						<option value="day">
-							日榜
-						</option>
-						<option value="week">
-							周榜
-						</option>
-						<option value="month">
-							月榜
-						</option>
-						<option value="week_rookie">
-							新人
-						</option>
-						<option value="week_original">
-							原创
-						</option>
-						<option value="day_male">
-							男性向
-						</option>
-						<option value="day_female">
-							女性向
-						</option>
-					</select>
-					<span>
-						日期
+                    </button>
+                </div>
+                <div id="example1-tab3" class="mdui-p-a-2">
+                    <select v-model="PmodeRank" class="mdui-select" mdui-select>
+                        <option value="" disabled>
+                            默认
+                        </option>
+                        <option value="day">
+                            日榜
+                        </option>
+                        <option value="week">
+                            周榜
+                        </option>
+                        <option value="month">
+                            月榜
+                        </option>
+                        <option value="week_rookie">
+                            新人
+                        </option>
+                        <option value="week_original">
+                            原创
+                        </option>
+                        <option value="day_male">
+                            男性向
+                        </option>
+                        <option value="day_female">
+                            女性向
+                        </option>
+                    </select>
+                    <input class="mdui-select" type="date" min="2006-12-31" v-model="Pdate">
+                    <button class="mdui-btn mdui-btn-raised mdui-btn-icon mdui-color-theme-accent" v-on:click="parseApi('rank')">
+                        <i class="mdui-icon material-icons">
+							search
+						</i>
+                    </button>
+                </div>
+
+                <!--分割线-->
+                <center>
+                    <span>
+					  翻页
 					</span>
-					<input type="date" min="2006-12-31" v-model="Pdate">
-					<button class="mdui-btn mdui-btn-raised mdui-btn-icon mdui-color-theme-accent"
-					v-on:click="parseApi('rank')">
-						<i class="mdui-icon material-icons">
-							search
-						</i>
-					</button>
-					<!--分割线-->
-					<br />
-					<br />
-					<span>
-						翻页
-					</span>
-					<button v-on:click="Ppage -= 1;parseApi()" class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-ripple"
-					v-bind:disabled="isDisabled">
-						<i class="mdui-icon material-icons">
+                    <button v-on:click="Ppage -= 1;parseApi()" class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-ripple" v-bind:disabled="isDisabled">
+                        <i class="mdui-icon material-icons">
 							chevron_left
 						</i>
-					</button>
-					<input v-model.number="Ppage" class="mdui-textfield-input" type="number"
-					style="max-width:50px;display:inline" placeholder="指定页">
-					<button v-on:click="Ppage += 1;parseApi()" class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-ripple"
-					v-bind:disabled="isDisabled">
-						<i class="mdui-icon material-icons">
+                    </button>
+                    <input v-model.number="Ppage" class="mdui-textfield-input" type="number" style="max-width:50px;display:inline" placeholder="指定页">
+                    <button v-on:click="Ppage += 1;parseApi()" class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-ripple" v-bind:disabled="isDisabled">
+                        <i class="mdui-icon material-icons">
 							chevron_right
 						</i>
-					</button>
-					<div style="height:20px">
-					</div>
-				</div>
-				<!--结束控制器-->
-				<ul class="mdui-list">
-					<li class="mdui-list-item mdui-ripple" mdui-drawer-close>
-						<i class="mdui-list-item-icon mdui-icon material-icons">
+                    </button>
+                </center>
+            </div>
+            <!--结束控制器-->
+            <ul class="mdui-list">
+                <li class="mdui-list-item mdui-ripple" onclick="window.open('https://blog.poo.li/')">
+                    <i class="mdui-list-item-icon mdui-icon material-icons">
+							info_outline
+						</i>
+                    <div class="mdui-list-item-content">
+                        关于
+                    </div>
+                </li>
+                <li class="mdui-list-item mdui-ripple" onclick="showHelp()">
+                    <i class="mdui-list-item-icon mdui-icon material-icons">
+							help_outline
+						</i>
+                    <div class="mdui-list-item-content">
+                        帮助
+                    </div>
+                </li>
+                <li class="mdui-list-item mdui-ripple" mdui-drawer-close>
+                    <i class="mdui-list-item-icon mdui-icon material-icons">
 							close
 						</i>
-						<div class="mdui-list-item-content">
-							关闭
-						</div>
-					</li>
-				</ul>
-			</div>
-			<!-上面抽屉-->
-			<div class="mdui-container">
-				<div v-for="tag in PresponseC" class="mdui-chip" v-on:click="Pkey=tag.tag;PmodeSearch='partial_match_for_tags';">
-					<span class="mdui-chip-icon">
+                    <div class="mdui-list-item-content">
+                        关闭
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <!-上面抽屉-->
+        <div class="mdui-container">
+            <div v-for="tag in PresponseC" class="mdui-chip" v-on:click="Pkey=tag.tag;PmodeSearch='partial_match_for_tags';">
+                <span class="mdui-chip-icon">
 						<i class="mdui-icon material-icons">
 							loyalty
 						</i>
 					</span>
-					<span class="mdui-chip-title">
+                <span class="mdui-chip-title">
 						{{tag.tag}}
 					</span>
-				</div>
-				<!---循环开始A-->
-				<div class="columns">
-					<div class="mdui-card column col-6 col-sm-12 col-xs-12" v-for="illust in PresponseA">
-						<!-- 卡片头部，包含头像、标题、副标题 -->
-						<div class="mdui-card-header">
-							<img class="mdui-card-header-avatar" v-lazy="illust.user.profile_image_urls.medium"
-							/>
-							<div class="mdui-card-header-title">
-								{{illust.user.name}}
-							</div>
-							<div class="mdui-card-header-subtitle">
-								{{illust.user.id}}｜{{illust.user.account}}
-							</div>
-						</div>
-						<!-- 卡片的媒体内容，可以包含图片、视频等媒体内容，以及标题、副标题 -->
-						<div class="mdui-card-media">
-							<img v-lazy="illust.image_urls[Pquality]">
-							
-								
-							<!-- 卡片中可以包含一个或多个菜单按钮 -->
-							<div class="mdui-card-menu" v-if="showDetailMsg">
-								<button class="mdui-btn mdui-btn-icon mdui-text-color-white" v-on:click='mdui.alert(illust.caption+"<br /><br />原图"+illust.meta_single_page.original_image_url, "细节")'>
-									<i class="mdui-icon material-icons">
+            </div>
+            <!---循环开始A-->
+            <div class="columns">
+                <div class="mdui-card column col-6 col-sm-12 col-xs-12" v-for="illust in PresponseA">
+                    <!-- 卡片头部，包含头像、标题、副标题 -->
+                    <div class="mdui-card-header">
+                        <img class="mdui-card-header-avatar" v-lazy="illust.user.profile_image_urls.medium" v-on:click="Ptype='member';Pid=illust.user.id;parseApi()" />
+                        <div class="mdui-card-header-title">
+                            {{illust.user.name}}
+                        </div>
+                        <div class="mdui-card-header-subtitle">
+                            {{illust.user.id}}｜{{illust.user.account}}
+                        </div>
+                    </div>
+                    <!-- 卡片的媒体内容，可以包含图片、视频等媒体内容，以及标题、副标题 -->
+                    <div class="mdui-card-media">
+                        <img v-lazy="illust.image_urls[Pquality]" v-on:click="Ptype='illust';Pid=illust.id;parseApi('typeA')">
+                        <!-- 卡片中可以包含一个或多个菜单按钮 -->
+                        <div class="mdui-card-menu" v-if="showDetailMsg">
+                            <button class="mdui-btn mdui-btn-icon mdui-text-color-white" v-on:click='mdui.alert(illust.caption+"<br /><br />原图"+illust.meta_single_page.original_image_url, "细节")'>
+                                <i class="mdui-icon material-icons">
 										link
 									</i>
-								</button>
-							</div>
-						</div>
-						<!-- 卡片的标题和副标题 -->
-						<div class="mdui-card-primary">
-							<div class="mdui-card-primary-title">
-								{{illust.title}}
-							</div>
-							<div class="mdui-card-primary-subtitle">
-								{{illust.id}}
-							</div>
-						</div>
-						<!-- 卡片的内容 -->
-						<div class="mdui-card-content mdui-typo main-content" v-if="showDetailTags">
-							<div class="mdui-chip">
-								<span class="mdui-chip-icon">
-									<i class="mdui-icon material-icons">
+                            </button>
+                        </div>
+                    </div>
+                    <!-- 卡片的标题和副标题 -->
+                    <div class="mdui-card-primary">
+                        <div class="mdui-card-primary-title">
+                            {{illust.title}}
+                        </div>
+                        <div class="mdui-card-primary-subtitle">
+                            {{illust.id}}
+                        </div>
+                    </div>
+                    <!-- 卡片的内容 -->
+                    <div class="mdui-card-content mdui-typo main-content" v-if="showDetailTags">
+                        <div class="mdui-chip">
+                            <span class="mdui-chip-icon">
+									<i class="mdui-icon material-icons" mdui-tooltip="{content: '收藏'}">
 										star
 									</i>
 								</span>
-								<span class="mdui-chip-title">
+                            <span class="mdui-chip-title">
 									收藏数{{illust.total_bookmarks}}
 								</span>
-							</div>
-							<div class="mdui-chip">
-								<span class="mdui-chip-icon">
+                        </div>
+                        <div class="mdui-chip">
+                            <span class="mdui-chip-icon">
 									<i class="mdui-icon material-icons">
 										visibility
 									</i>
 								</span>
-								<span class="mdui-chip-title">
+                            <span class="mdui-chip-title">
 									查看数{{illust.total_view}}
 								</span>
-							</div>
-							<div class="mdui-chip">
-								<span class="mdui-chip-icon">
+                        </div>
+                        <div class="mdui-chip">
+                            <span class="mdui-chip-icon">
 									<i class="mdui-icon material-icons">
 										panorama_horizontal
 									</i>
 								</span>
-								<span class="mdui-chip-title">
+                            <span class="mdui-chip-title">
 									宽度{{illust.width}}
 								</span>
-							</div>
-							<div class="mdui-chip">
-								<span class="mdui-chip-icon">
+                        </div>
+                        <div class="mdui-chip">
+                            <span class="mdui-chip-icon">
 									<i class="mdui-icon material-icons">
 										panorama_vertical
 									</i>
 								</span>
-								<span class="mdui-chip-title">
+                            <span class="mdui-chip-title">
 									高度{{illust.height}}
 								</span>
-							</div>
-							<div class="mdui-chip">
-								<span class="mdui-chip-icon">
+                        </div>
+                        <div class="mdui-chip">
+                            <span class="mdui-chip-icon">
 									<i class="mdui-icon material-icons">
 										access_time
 									</i>
 								</span>
-								<span class="mdui-chip-title">
+                            <span class="mdui-chip-title">
 									时间{{illust.create_date}}
 								</span>
-							</div>
-							<br />
-							<div v-for="tag in illust.tags" class="mdui-chip" v-on:click="Pkey=tag.name;PmodeSearch='partial_match_for_tags';">
-								<span class="mdui-chip-icon">
+                        </div>
+                        <br />
+                        <div v-for="tag in illust.tags" class="mdui-chip" v-on:click="Pkey=tag.name;PmodeSearch='partial_match_for_tags';">
+                            <span class="mdui-chip-icon">
 									<i class="mdui-icon material-icons">
 										loyalty
 									</i>
 								</span>
-								<span class="mdui-chip-title">
+                            <span class="mdui-chip-title">
 									{{tag.name}}
 								</span>
-							</div>
-						</div>
-						<!-- 卡片的按钮 -->
-						<div class="mdui-card-actions">
-							<button class="mdui-btn mdui-ripple" v-on:click="Ptype='member_illust';Pid=illust.user.id;parseApi('typeA')">
-								画师
-							</button>
-							<button class="mdui-btn mdui-ripple" v-on:click="Ptype='related';Pid=illust.id;parseApi('typeA')">
-								相关
-							</button>
-							<button class="mdui-btn mdui-ripple" v-on:click="Ptype='illust';Pid=illust.id;parseApi('typeA')">
-								原图
-							</button>
-							<button class="mdui-btn mdui-btn-icon mdui-float-right" onclick="addStar(app.Purl)">
-								<i class="mdui-icon material-icons">
+                        </div>
+                    </div>
+                    <!-- 卡片的按钮 -->
+                    <div class="mdui-card-actions">
+                        <button class="mdui-btn mdui-ripple" v-on:click="Ptype='member_illust';Pid=illust.user.id;parseApi('typeA')">
+                            画师
+                        </button>
+                        <button class="mdui-btn mdui-ripple" v-on:click="Ptype='related';Pid=illust.id;parseApi('typeA')">
+                            相关
+                        </button>
+                        <button class="mdui-btn mdui-ripple" v-on:click="Ptype='illust';Pid=illust.id;parseApi('typeA')">
+                            原图
+                        </button>
+                        <button class="mdui-btn mdui-btn-icon mdui-float-right" onclick="addStar(app.Purl)">
+                            <i class="mdui-icon material-icons" mdui-tooltip="{content: '收藏'}">
 									star
 								</i>
-							</button>
-						</div>
-					</div>
-				</div>
-				<!--循环结束A--->
-				<!---循环开始B-->
-				<div class="mdui-row-xs-1 mdui-row-sm-2 mdui-row-md-3 mdui-row-lg-4 mdui-row-xl-5 mdui-grid-list">
-					<div class="mdui-card mdui-col" v-for="user in PresponseB">
-						<!-- 卡片头部，包含头像、标题、副标题 -->
-						<div class="mdui-card-header">
-							<img class="mdui-card-header-avatar" v-lazy="user.user.profile_image_urls.medium"
-							/>
-							<div class="mdui-card-header-title">
-								{{user.user.name}}
-							</div>
-							<div class="mdui-card-header-subtitle">
-								{{user.user.id}}｜{{user.user.account}}
-							</div>
-						</div>
-						<!-- 卡片的内容 -->
-						<div class="mdui-card-content main-content main-preview" v-if="isPreview">
-							<!----嵌套卡片-->
-							<div class="mdui-card" v-for="illust in user.illusts">
-								<div class="mdui-card-media">
-									<img v-lazy="illust.image_urls[Pquality]" />
-								</div>
-								<div class="mdui-card-primary">
-									<div class="mdui-card-primary-title">
-										{{illust.title}}
-									</div>
-									<div class="mdui-card-primary-subtitle">
-										{{illust.id}}
-									</div>
-								</div>
-							</div>
-						</div>
-						<!-- 卡片的按钮 -->
-						<div class="mdui-card-actions">
-							<button class="mdui-btn mdui-ripple" v-on:click="Ptype='member_illust';Pid=user.user.id;parseApi('typeA')">
-								TA的作品
-							</button>
-							<button class="mdui-btn mdui-ripple">
-								详细(没写)
-							</button>
-							<button class="mdui-btn mdui-btn-icon mdui-float-right" onclick="addStar(app.Purl)">
-								<i class="mdui-icon material-icons">
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!--循环结束A--->
+            <!---循环开始B-->
+            <div class="mdui-row-xs-1 mdui-row-sm-2 mdui-row-md-3 mdui-row-lg-4 mdui-row-xl-5 mdui-grid-list">
+                <div class="mdui-card mdui-col" v-for="user in PresponseB">
+                    <!-- 卡片头部，包含头像、标题、副标题 -->
+                    <div class="mdui-card-header">
+                        <img class="mdui-card-header-avatar" v-lazy="user.user.profile_image_urls.medium" />
+                        <div class="mdui-card-header-title">
+                            {{user.user.name}}
+                        </div>
+                        <div class="mdui-card-header-subtitle">
+                            {{user.user.id}}｜{{user.user.account}}
+                        </div>
+                    </div>
+                    <!-- 卡片的内容 -->
+                    <div class="mdui-card-content main-content main-preview" v-if="isPreview">
+                        <!----嵌套卡片-->
+                        <div class="mdui-card" v-for="illust in user.illusts">
+                            <div class="mdui-card-media">
+                                <img v-lazy="illust.image_urls[Pquality]" />
+                            </div>
+                            <div class="mdui-card-primary">
+                                <div class="mdui-card-primary-title">
+                                    {{illust.title}}
+                                </div>
+                                <div class="mdui-card-primary-subtitle">
+                                    {{illust.id}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 卡片的按钮 -->
+                    <div class="mdui-card-actions">
+                        <button class="mdui-btn mdui-ripple" v-on:click="Ptype='member_illust';Pid=user.user.id;parseApi('typeA')">
+                            TA的作品
+                        </button>
+                        <button class="mdui-btn mdui-ripple" v-on:click="Ptype='member';Pid=user.user.id;parseApi()">
+                            详细
+                        </button>
+                        <button class="mdui-btn mdui-btn-icon mdui-float-right" onclick="addStar(app.Purl)">
+                            <i class="mdui-icon material-icons">
 									star
 								</i>
-							</button>
-						</div>
-					</div>
-				</div>
-				<!---循环结束B-->
-				<!---控制-->
-				<div class="mdui-dialog" id="myControl">
-					<div class="mdui-dialog-title">
-						控制
-					</div>
-					<div class="mdui-dialog-content">
-						当前API：{{Purl}}
-						<div class="-mdui-btn-group">
-							<button v-on:click="clearResponse()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
-								清空输出
-							</button>
-							<button onclick="recovery()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
-								变量初始化(出错时使用)
-							</button>
-						</div>
-						<br />
-						<div class="mdui-divider">
-						</div>
-						<label class="mdui-checkbox">
-							<input type="checkbox" v-model="isPreview" />
-							<i class="mdui-checkbox-icon">
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!---循环结束B-->
+            <!---控制-->
+            <div class="mdui-dialog" id="myControl">
+                <div class="mdui-dialog-title">
+                    控制
+                </div>
+                <div class="mdui-dialog-content">
+                    当前API：{{Purl}}
+                    <div class="-mdui-btn-group">
+                        <button v-on:click="clearResponse()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
+                            清空输出
+                        </button>
+                        <button onclick="recovery()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
+                            变量初始化(出错时使用)
+                        </button>
+                    </div>
+                    <br />
+                    <div class="mdui-divider">
+                    </div>
+                    <label class="mdui-checkbox">
+                        <input type="checkbox" v-model="isPreview" />
+                        <i class="mdui-checkbox-icon">
+							</i> 预览画师图片
+                    </label>
+                    <label class="mdui-checkbox">
+                        <input type="checkbox" v-model="showHotTags" />
+                        <i class="mdui-checkbox-icon">
+							</i> 查看热门标签
+                    </label>
+                    <br />
+                    <label class="mdui-switch">
+                        <input type="checkbox" v-model="showDetailMsg" />
+                        <i class="mdui-switch-icon">
 							</i>
-							预览画师图片
-						</label>
-						<label class="mdui-checkbox">
-							<input type="checkbox" v-model="showHotTags" />
-							<i class="mdui-checkbox-icon">
+                    </label>
+                    显示作品说明(图片右上角)
+                    <br />
+                    <label class="mdui-switch">
+                        <input type="checkbox" v-model="showDetailTags" />
+                        <i class="mdui-switch-icon">
 							</i>
-							查看热门标签
-						</label>
-						<br />
-						<label class="mdui-switch">
-							<input type="checkbox" v-model="showDetailMsg" />
-							<i class="mdui-switch-icon">
-							</i>
-						</label>
-						显示作品说明(图片右上角)
-						<br />
-						<label class="mdui-switch">
-							<input type="checkbox" v-model="showDetailTags" />
-							<i class="mdui-switch-icon">
-							</i>
-						</label>
-						显示作品标签
-					</div>
-					<div class="mdui-dialog-actions">
-						<button class="mdui-btn mdui-ripple" mdui-dialog-close>
-							关闭
-						</button>
-					</div>
-				</div>
-				<!--历史记录-->
-				<div class="mdui-dialog" id="myHistory">
-					<div class="mdui-dialog-title">
-						历史
-					</div>
-					<div class="mdui-dialog-content">
-						<div class="mdui-list" v-for="url in localHistory">
-							<a v-on:click="parseApi(null,url)" class="mdui-list-item mdui-ripple">
+                    </label>
+                    显示作品标签
+                </div>
+                <div class="mdui-dialog-actions">
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
+                        关闭
+                    </button>
+                </div>
+            </div>
+            <!--历史记录-->
+            <div class="mdui-dialog" id="myHistory">
+                <div class="mdui-dialog-title">
+                    历史
+                </div>
+                <div class="mdui-dialog-content">
+                    <div class="mdui-list" v-for="url in localHistory">
+                        <a v-on:click="parseApi(null,url)" class="mdui-list-item mdui-ripple">
 								{{url}}
 							</a>
-						</div>
-					</div>
-					<div class="mdui-dialog-actions">
-						<button class="mdui-btn mdui-ripple" onclick="localStorage.history='[]';app.localHistory=[];mdui.snackbar({message: '清除成功！',position: 'right-top'});">
-							清空
-						</button>
-						<button class="mdui-btn mdui-ripple" mdui-dialog-close>
-							关闭
-						</button>
-					</div>
-				</div>
-				<!--收藏-->
-				<div class="mdui-dialog" id="myStar">
-					<div class="mdui-dialog-title">
-						收藏
-					</div>
-					<div class="mdui-dialog-content">
-						<div class="mdui-list" v-for="url in localStar">
-							<a v-on:click="parseApi(null,url)" class="mdui-list-item mdui-ripple">
+                    </div>
+                </div>
+                <div class="mdui-dialog-actions">
+                    <button class="mdui-btn mdui-ripple" onclick="localStorage.history='[]';app.localHistory=[];mdui.snackbar({message: '清除成功！',position: 'right-top'});">
+                        清空
+                    </button>
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
+                        关闭
+                    </button>
+                </div>
+            </div>
+            <!--收藏-->
+            <div class="mdui-dialog" id="myStar">
+                <div class="mdui-dialog-title">
+                    收藏
+                </div>
+                <div class="mdui-dialog-content">
+                    <div class="mdui-list" v-for="url in localStar">
+                        <a v-on:click="parseApi(null,url)" class="mdui-list-item mdui-ripple">
 								{{url}}
 							</a>
-						</div>
-					</div>
-					<div class="mdui-dialog-actions">
-						<button class="mdui-btn mdui-ripple" mdui-dialog="{target: '#exportData'}"
-						mdui-dialog-confirm>
-							导出
-						</button>
-						<button class="mdui-btn mdui-ripple" mdui-dialog="{target: '#importData'}"
-						mdui-dialog-confirm>
-							导入
-						</button>
-						<button class="mdui-btn mdui-ripple" onclick="localStorage.star='[]';app.localStar=[];mdui.snackbar({message: '清除成功！',position: 'right-top'});">
-							清空
-						</button>
-						<button class="mdui-btn mdui-ripple" mdui-dialog-close>
-							关闭
-						</button>
-					</div>
-				</div>
-				<!--设置-->
-				<div class="mdui-dialog" id="mySettings">
-					<div class="mdui-dialog-title">
-						设置
-					</div>
-					<div class="mdui-dialog-content">
-						<br />
-						<label class="mdui-radio">
-							<input type="radio" value="large" v-model="Pquality" />
-							<i class="mdui-radio-icon">
-							</i>
-							清晰
-						</label>
-						<br />
-						<label class="mdui-radio">
-							<input type="radio" value="medium" v-model="Pquality" />
-							<i class="mdui-radio-icon">
-							</i>
-							不清晰
-						</label>
-						<br />
-						<label class="mdui-radio">
-							<input type="radio" value="square_medium" v-model="Pquality" />
-							<i class="mdui-radio-icon">
-							</i>
-							最不清晰
-						</label>
-						<div class="mdui-divider"></div>
-						
-						<label class="mdui-radio">
-							<input type="radio" value="planA" v-model="picked" />
-							<i class="mdui-radio-icon">
-							</i>
-							pixiv.cat代理
-						</label>
-						<br />
-						<label class="mdui-radio">
-							<input type="radio" value="planB" v-model="picked" />
-							<i class="mdui-radio-icon">
-							</i>
-							www.moe123.net代理
-						</label>
-						<br />
-						<label class="mdui-radio">
-							<input type="radio" value="planC" v-model="picked" />
-							<i class="mdui-radio-icon">
-							</i>
-							自用代理
-						</label>
-						<br />
-						<label class="mdui-radio">
-							<input type="radio" value="planD" v-model="picked" />
-							<i class="mdui-radio-icon">
-							</i>
-							自用代理2
-						</label>
-						<br />
-					</div>
-					<div class="mdui-dialog-actions">
-						<button class="mdui-btn mdui-ripple" mdui-dialog-close>
-							关闭
-						</button>
-					</div>
-				</div>
-				<!--导出-->
-				<div class="mdui-dialog" id="exportData">
-					<div class="mdui-dialog-title">
-						导出
-					</div>
-					<div class="mdui-dialog-content">
-						<br />
-						<div class="mdui-textfield">
-							<textarea class="mdui-textfield-input" rows="6" placeholder="空" disabled>
-								{{localStar}}
-							</textarea>
-						</div>
-					</div>
-					<div class="mdui-dialog-actions">
-						<button class="mdui-btn mdui-ripple" mdui-dialog-close>
-							关闭
-						</button>
-					</div>
-				</div>
-				<!--导入-->
-				<div class="mdui-dialog" id="importData">
-					<div class="mdui-dialog-title">
-						导入
-					</div>
-					<div class="mdui-dialog-content">
-						<br />
-						<div class="mdui-textfield">
-							<textarea id="inputImport" class="mdui-textfield-input" rows="6" placeholder="输入文本...">
-							</textarea>
-						</div>
-					</div>
-					<div class="mdui-dialog-actions">
-						<button class="mdui-btn mdui-ripple" onclick="localStorage.star=document.getElementById('inputImport').value;app.localStar=JSON.parse(localStorage.star)"
-						mdui-dialog-confirm>
-							保存
-						</button>
-						<button class="mdui-btn mdui-ripple" mdui-dialog-close>
-							关闭
-						</button>
-					</div>
-				</div>
-				<!---底部导航栏-->
-				<div class="mdui-bottom-nav mdui-bottom-nav-text-auto mdui-bottom-nav-scroll-hide">
-					<a href="javascript:void(0);" mdui-dialog="{target: '#myControl'}" class="mdui-ripple mdui-bottom-nav-active">
-						<i class="mdui-icon material-icons">
+                    </div>
+                </div>
+                <div class="mdui-dialog-actions">
+                    <button class="mdui-btn mdui-ripple" mdui-dialog="{target: '#exportData'}" mdui-dialog-confirm>
+                        导出
+                    </button>
+                    <button class="mdui-btn mdui-ripple" mdui-dialog="{target: '#importData'}" mdui-dialog-confirm>
+                        导入
+                    </button>
+                    <button class="mdui-btn mdui-ripple" onclick="localStorage.star='[]';app.localStar=[];mdui.snackbar({message: '清除成功！',position: 'right-top'});">
+                        清空
+                    </button>
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
+                        关闭
+                    </button>
+                </div>
+            </div>
+            <!--设置-->
+            <div class="mdui-dialog" id="mySettings">
+                <div class="mdui-dialog-title">
+                    设置
+                </div>
+                <div class="mdui-dialog-content">
+                    <br />
+                    <label class="mdui-radio">
+                        <input type="radio" value="large" v-model="Pquality" />
+                        <i class="mdui-radio-icon">
+							</i> 清晰
+                    </label>
+                    <br />
+                    <label class="mdui-radio">
+                        <input type="radio" value="medium" v-model="Pquality" />
+                        <i class="mdui-radio-icon">
+							</i> 不清晰
+                    </label>
+                    <br />
+                    <label class="mdui-radio">
+                        <input type="radio" value="square_medium" v-model="Pquality" />
+                        <i class="mdui-radio-icon">
+							</i> 最不清晰
+                    </label>
+                    <div class="mdui-divider"></div>
+
+                    <label class="mdui-radio">
+                        <input type="radio" value="planA" v-model="picked" />
+                        <i class="mdui-radio-icon">
+							</i> pixiv.cat代理
+                    </label>
+                    <br />
+                    <label class="mdui-radio">
+                        <input type="radio" value="planB" v-model="picked" />
+                        <i class="mdui-radio-icon">
+							</i> www.moe123.net代理
+                    </label>
+                    <br />
+                    <label class="mdui-radio">
+                        <input type="radio" value="planC" v-model="picked" />
+                        <i class="mdui-radio-icon">
+							</i> 自用代理
+                    </label>
+                    <br />
+                    <label class="mdui-radio">
+                        <input type="radio" value="planD" v-model="picked" />
+                        <i class="mdui-radio-icon">
+							</i> 自用代理2
+                    </label>
+                    <br />
+                </div>
+                <div class="mdui-dialog-actions">
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
+                        关闭
+                    </button>
+                </div>
+            </div>
+            <!--导出-->
+            <div class="mdui-dialog" id="exportData">
+                <div class="mdui-dialog-title">
+                    导出
+                </div>
+                <div class="mdui-dialog-content">
+                    <br />
+                    <div class="mdui-textfield">
+                        <textarea class="mdui-textfield-input" rows="6" placeholder="空" disabled>
+                            {{localStar}}
+                        </textarea>
+                    </div>
+                </div>
+                <div class="mdui-dialog-actions">
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
+                        关闭
+                    </button>
+                </div>
+            </div>
+            <!--导入-->
+            <div class="mdui-dialog" id="importData">
+                <div class="mdui-dialog-title">
+                    导入
+                </div>
+                <div class="mdui-dialog-content">
+                    <br />
+                    <div class="mdui-textfield">
+                        <textarea id="inputImport" class="mdui-textfield-input" rows="6" placeholder="输入文本...">
+                        </textarea>
+                    </div>
+                </div>
+                <div class="mdui-dialog-actions">
+                    <button class="mdui-btn mdui-ripple" onclick="localStorage.star=document.getElementById('inputImport').value;app.localStar=JSON.parse(localStorage.star)" mdui-dialog-confirm>
+                        保存
+                    </button>
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
+                        关闭
+                    </button>
+                </div>
+            </div>
+            <!---底部导航栏-->
+            <div class="mdui-bottom-nav mdui-bottom-nav-text-auto mdui-bottom-nav-scroll-hide">
+                <a href="javascript:void(0);" mdui-dialog="{target: '#myControl'}" class="mdui-ripple mdui-bottom-nav-active">
+                    <i class="mdui-icon material-icons">
 							wallpaper
 						</i>
-						<label>
-							控制
-						</label>
-					</a>
-					<a href="javascript:void(0);" mdui-dialog="{target: '#myHistory'}" class="mdui-ripple">
-						<i class="mdui-icon material-icons">
+                    <label>
+                        控制
+                    </label>
+                </a>
+                <a href="javascript:void(0);" mdui-dialog="{target: '#myHistory'}" class="mdui-ripple">
+                    <i class="mdui-icon material-icons">
 							visibility
 						</i>
-						<label>
-							历史
-						</label>
-					</a>
-					<a href="javascript:void(0);" mdui-dialog="{target: '#myStar'}" class="mdui-ripple">
-						<i class="mdui-icon material-icons">
+                    <label>
+                        历史
+                    </label>
+                </a>
+                <a href="javascript:void(0);" mdui-dialog="{target: '#myStar'}" class="mdui-ripple">
+                    <i class="mdui-icon material-icons">
 							star
 						</i>
-						<label>
-							收藏
-						</label>
-					</a>
-					<a href="javascript:void(0);" mdui-dialog="{target: '#mySettings'}" class="mdui-ripple">
-						<i class="mdui-icon material-icons">
+                    <label>
+                        收藏
+                    </label>
+                </a>
+                <a href="javascript:void(0);" mdui-dialog="{target: '#mySettings'}" class="mdui-ripple">
+                    <i class="mdui-icon material-icons">
 							tune
 						</i>
-						<label>
-							设置
-						</label>
-					</a>
-				</div>
-			</div>
-			<!--错误-->
-			<div style="height:5px">
-			</div>
-			<div class="mdui-card" v-if="Perror">
-				<div class="mdui-card-media">
-					<img src="./src/card.jpg" />
-					<div class="mdui-card-media-covered">
-						<div class="mdui-card-primary">
-							<div class="mdui-card-primary-title">
-								出错
-							</div>
-							<div class="mdui-card-primary-subtitle">
-								error
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="mdui-card-actions">
-					<button class="mdui-btn mdui-ripple" v-on:click="Perror=false">
-						关闭
-					</button>
-				</div>
-			</div>
-			<!--空-->
-			<div class="mdui-card" v-if="!(PresponseA||PresponseB||PresponseC)">
-				<div class="mdui-card-media">
-					<img src="./src/card.jpg" />
-					<div class="mdui-card-media-covered">
-						<div class="mdui-card-primary">
-							<div class="mdui-card-primary-title">
-								输出为空
-							</div>
-							<div class="mdui-card-primary-subtitle">
-								blank
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="mdui-card-actions">
-					<button class="mdui-btn mdui-ripple" v-on:click="PresponseC=true">
-						关闭
-					</button>
-				</div>
-			</div>
-			<!--vue结束-->
-			<!--button style="z-index:999" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent mdui-fab-hide"
-			id="scrolltop" onclick="window.scroll({ top: 0, left: 0, behavior: 'smooth' })">
-				<i class="mdui-icon material-icons">
-					keyboard_arrow_up
-				</i>
-			</button-->
-		</div>
-		<script>
-			Vue.use(VueLazyload, {
-    preLoad: 1.8,
-    error: './src/card.jpg',
-    loading: './src/loading.gif',
-    attempt: 1,
-    listenEvents: ['scroll']
-})
-
-var app = new Vue({
-    el: '#app',
-    data: { //大P开头，表示请求数据
-        Ptype: '',
-        Pkey: '',
-        PmodeRank: '',
-        PmodeSearch: '',
-        Ppage: 1,
-        Pid: '16361124',
-        Porder: '',
-        Pdate: '',
-        Purl: '',
-        Pquality: 'medium',
-        PresponseA: '',
-        PresponseB: '',
-        PresponseC: '',
-        Perror: '',
-        mdui: '',
-        localStar: [],
-        localHistory: [],
-        picked: 'planB',
-        isPreview: false,
-        isDisabled: true,
-        showHotTags: false,
-        showDetailTags: false,
-        showDetailMsg: false,
-    },
-
-    methods: {
-        parseApi: function(type) {
-            //错误处理
-            if (app.Ppage < 1) {
-                app.Ppage = 1;
-                return false;
-            }
-            app.showHotTags = false;
-            var date = '';
-            var typeModeA = ['member_illust', 'favorite', 'related', 'rank', 'search'];
-            var typeModeB = ['following', 'follower'];
-            //判断输入type
-            switch (type) {
-                case "typeA":
-                    //若查询数组a
-                    if (!app.Ptype.length) {
-                        mdui.alert("必须指定type!");
-                        return false
-                    }
-                    if (typeModeB.indexOf(app.Ptype) === -1) app.Ppage = 1;
-                    app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid + '&page=' + app.Ppage;
-                    break;
-                case "search":
-                    //若搜索关键词
-                    if (app.PmodeSearch == 0) {
-                        mdui.alert("必须指定mode!");
-                        return false
-                    }
-                    app.Ptype = 'search';
-                    app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=search&mode=' + app.PmodeSearch + '&order=' + app.Porder + '&word=' + app.Pkey + '&page=' + app.Ppage;
-                    break;
-                case "rank":
-                    //若查询排行榜
-                    app.Ptype = 'rank';
-                    app.Ppage = 1;
-                    app.Pid = '';
-                    date = '&date=' + app.Pdate;
-                    app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=rank&mode=' + app.PmodeRank + date;
-                    break;
-                case "illust":
-                    //若查询插画
-                    app.Ptype = 'illust';
-                    app.Ppage = 1;
-                    app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=illust&id=' + app.Pid;
-                    break;
-                default:
-                    //默认，也就是翻页
-                    if (app.Ptype === 'search') {
-                        app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=search&mode=' + app.PmodeSearch + '&order=' + app.Porder + '&word=' + app.Pkey + '&page=' + app.Ppage;
-                    } else {
-                        app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid + '&page=' + app.Ppage;
-                    }
-            }
-            //清空原数据
-            app.PresponseA = '';
-            app.PresponseB = '';
-            //如果直接输入api
-            if (typeof arguments[1] !== "undefined") {
-                app.Purl = arguments[1];
-                app.Ptype = parseUrl(app.Purl).type;
-                app.Pmode = parseUrl(app.Purl).mode;
-                app.Pid = parseUrl(app.Purl).id;
-            }
-            //保存记录到localStorage
-            if (app.Purl === "") return false;
-            try {
-                addHistory(app.Purl);
-                location.assign("#" + app.Purl);
-            } catch (e) {
-                console.log("可能不支持localStorage");
-                console.error(e)
-            }
-            //弹出snackbar
-            mdui.snackbar({
-                message: '查询中，切勿重复点击！',
-                position: 'right-top'
-            });
-            //获取数据
-            axios.get(app.Purl).then(function(response) {
-                    //简单错误处理
-                    if (JSON.stringify(response.data).length < 38) mdui.alert("请求可能失败，或者为空<br />出错json：<br />" + JSON.stringify(response.data));
-                    if (response.data.hasOwnProperty("error")) {
-                        app.Perror = response.data.error.message;
-                        mdui.alert(app.Perror);
-                        leftDrawer.open();
-                    }
-                    //判断type，数组在开头
-                    if (typeModeA.indexOf(app.Ptype) !== -1) {
-                        //设置代理,模式A
-                        app.PresponseA = arrayAddProxy(response.data.illusts);
-                    }
-                    if (typeModeB.indexOf(app.Ptype) !== -1) {
-                        //设置代理,模式B
-                        app.PresponseB = arrayAddProxy(response.data.user_previews);
-                    }
-                    if (app.Ptype === "illust") {
-                        var illust = arrayAddProxy(response.data.illust);
-                        var content;
-                        content = '<img src="' + illust.meta_single_page.original_image_url + '">';
-                        for (let o = 0; o < illust.meta_pages.length; o++) {
-                            content += '<img src="' + illust.meta_pages[o].image_urls.original + '">';
-                        }
-                        mdui.alert("<h1>" + illust.title + "</h1>" + "画师：" + illust.user.name + "|" + illust.user.id + content + "<div style='height:200px'></div>"); //尾部
-                    }
-                    //结束
-                    leftDrawer.close();
-                })
-                //错误处理待定
-                
-            .catch(function(error) {
-                leftDrawer.open();
-                app.Perror = error;
-                mdui.alert(app.Perror);
-            });
-            //函数结束
-        },
-        getTags: function() {
-            if (app.showHotTags) {
-                axios.get('https://api.imjad.cn/pixiv/v2/?type=tags').then(function(response) {
-                    app.PresponseC = arrayAddProxy(response.data.trend_tags);
-                }).
-                catch(function(error) {
-                    console.log(error);
-                }); //此方法尾部 
-            } else {
-                app.PresponseC = '';
-            }
-        },
-        clearResponse: function() {
-            app.PresponseA = '';
-            app.PresponseB = '';
-            app.PresponseC = '';
-            app.showHotTags = false;
-            mdui.snackbar({
-                message: '成功！',
-                position: 'right-top'
-            });
-        }
-    },
-    watch: { //监控变量
-        Ptype: function(nval, oval) {
-            if (nval == 'search' || nval == 'following') {
-                app.isDisabled = false
-            } else {
-                app.isDisabled = true
-            }
-        },
-        showHotTags: function(nval, oval) {
-            if (oval != nval) app.getTags();
-        },
-        picked: function(nval, oval) {
-            if (oval != nval) localStorage.picked = app.picked;
-        },
-        Pquality: function(nval, oval) {
-            if (oval != nval) localStorage.Pquality = app.Pquality;
-        },
-        isPreview: function(nval, oval) {
-            if (oval != nval) localStorage.isPreview = app.isPreview;
-        },
-        showDetailTags: function(nval, oval) {
-            if (oval != nval) localStorage.showDetailTags = app.showDetailTags;
-        },
-        showDetailMsg: function(nval, oval) {
-            if (oval != nval) localStorage.showDetailMsg = app.showDetailMsg;
-        }
-
-    }
-
-});
-
-app.mdui = mdui;
-try { //恢复上次设置
-    if (typeof localStorage.isFirst === "undefined") {
-    	localStorage.Pquality="medium";
-        mdui.dialog({
-            title: '使用说明',
-            content: `<p>
-  本界面通过调用AD's API获取数据
- ，通过代理获取图片<br />
-主要使用Vue和MDUI框架</p>
-<p>打开侧边栏<i class="mdui-icon material-icons">menu</i>进行查询，查询完毕后，侧边栏自动关闭<br />
-底部按钮<i class="mdui-icon material-icons">wallpaper</i><i class="mdui-icon material-icons">visibility</i><i class="mdui-icon material-icons">star</i><i class="mdui-icon material-icons">tune</i>可进行设置<br />若图片无法加载，请修改<i class="mdui-icon material-icons">tune</i><strong>并刷新</strong>
-</p>`,
-            buttons: [{
-                text: '了解',
-                onClick: function(inst) {
-                    location.hash=''
-                }
-            }]
-        });
-        localStorage.isFirst = "no"
-    } else {
-        app.picked = localStorage.picked;
-        app.Pquality = localStorage.Pquality;
-        app.isPreview = Bool(localStorage.isPreview);
-        app.showDetailTags = Bool(localStorage.showDetailTags);
-        app.showDetailMsg = Bool(localStorage.showDetailMsg);
-        app.localHistory = JSON.parse(localStorage.history);
-        if(localStorage.star)app.localStar = JSON.parse(localStorage.star);
-    }
-} catch (e) { //可以本地运行
-    console.log("可能不支持localStorage");
-    console.error(e)
-}
-
-window.onload = function() {
-    //实例化抽屉
-    window.leftDrawer = new mdui.Drawer('#left-drawer');
-    leftDrawer.open();
-    if (location.href.lastIndexOf("#") > -1 && !location.href.includes("#mdui-dialog") && location.hash.length>7) {
-        leftDrawer.close();
-        //刷新时从#后重载
-        app.parseApi(null, location.hash.slice(1));
-    }
-}
-
-//回到顶部
-window.onscroll = function() {
-    20 < document.body.scrollTop || 20 < document.documentElement.scrollTop ? $$("#scrolltop").removeClass("mdui-fab-hide") : $$("#scrolltop").addClass("mdui-fab-hide")
-};
-
-function arrayAddProxy(arr) { //给对象添加代理
-        switch (app.picked) {
-            case 'planA':
-                var url = JSON.stringify(arr).replace(/https:\/\/i.pximg/g, "http://pixiv.dns.navy/view.php/https://i.pximg");
-                break;
-
-            case 'planB':
-                var url = JSON.stringify(arr).replace(/https:\/\/i.pximg.net/g, "https://www.moe123.net/api/imageproxy");
-                break;
-
-            case 'planC':
-                var url = JSON.stringify(arr).replace(/https:\/\/i.pximg/g, "http://i.kka.pub/PixivViewer/view.php/https://i.pximg");
-                break;
-
-            case 'planD':
-                var url = JSON.stringify(arr).replace(/i.pximg.net/g, "i.pixiv.cat");
-                break;
-
-
-            default:
-                var url = JSON.stringify(arr).replace(/i.pximg.net/g, "www.moe123.net/api/imageproxy");
-        }
-        url = JSON.parse(url);
-        return url;
-    }
+                    <label>
+                        设置
+                    </label>
+                </a>
+            </div>
+        </div>
+        <!--错误-->
+        <div style="height:5px">
+        </div>
+        <div class="mdui-card" v-if="Perror">
+            <div class="mdui-card-media">
+                <img src="./src/card.jpg" />
+                <div class="mdui-card-media-covered">
+                    <div class="mdui-card-primary">
+                        <div class="mdui-card-primary-title">
+                            出错
+                        </div>
+                        <div class="mdui-card-primary-subtitle">
+                            error
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mdui-card-actions">
+                <button class="mdui-btn mdui-ripple" v-on:click="Perror=false">
+                    关闭
+                </button>
+            </div>
+        </div>
+        <!--空-->
+        <div class="mdui-card" v-if="!(PresponseA||PresponseB||PresponseC)">
+            <div class="mdui-card-media">
+                <img src="./src/card.jpg" />
+                <div class="mdui-card-media-covered">
+                    <div class="mdui-card-primary">
+                        <div class="mdui-card-primary-title">
+                            输出为空
+                        </div>
+                        <div class="mdui-card-primary-subtitle">
+                            blank
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mdui-card-actions">
+                <button class="mdui-btn mdui-ripple" v-on:click="PresponseC=true">
+                    关闭
+                </button>
+            </div>
+        </div>
+        <!--vue结束-->
+    </div>
+</body>
+<script src="./src/main.js"></script>
+<script>
     /*统计*/
-var _mtac = {};
-(function() {
-    var mta = document.createElement("script");
-    mta.src = "//pingjs.qq.com/h5/stats.js?v2.0.4";
-    mta.setAttribute("name", "MTAH5");
-    mta.setAttribute("sid", "500711490");
+    var _mtac = {};
+    (function() {
+        var mta = document.createElement("script");
+        mta.src = "//pingjs.qq.com/h5/stats.js?v2.0.4";
+        mta.setAttribute("name", "MTAH5");
+        mta.setAttribute("sid", "500711490");
 
-    var s = document.getElementsByTagName("script")[0];
-    s.parentNode.insertBefore(mta, s);
-})();
-		</script>
-	</body>
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(mta, s);
+    })();
+</script>
 
 </html>
