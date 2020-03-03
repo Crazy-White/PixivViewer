@@ -1,5 +1,3 @@
-new VConsole();
-
 Vue.use(VueLazyload, {
     preLoad: 1.8,
     error: './src/card.jpg',
