@@ -3,7 +3,7 @@ img{max-width:100%}
 .show{display:inline-block}
 .hide{display:none}
 .main-content{white-space: nowrap;overflow: scroll}
-.mdui-card{margin-bottom:2px}
+.mdui-card{margin: 2em 0}
 .main-preview{justify-content:space-between;display:flex}
 .main-preview>.mdui-card{width:50%}
 /* by https://picturepan2.github.io/spectre/layout/grid.html */

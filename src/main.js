@@ -6,7 +6,7 @@ Vue.use(VueLazyload, {
     listenEvents: ['scroll']
 })
 
-var app = new Vue({
+let app = new Vue({
     el: '#app',
     data: { //大P开头，表示请求数据
         Ptype: '',
@@ -17,13 +17,12 @@ var app = new Vue({
         Pid: '16361124',
         Porder: '',
         Pdate: '',
-        Purl: '',
         Pquality: 'medium',
         PresponseA: '',
         PresponseB: '',
         PresponseC: '',
         Perror: '',
-        mdui: '',
+        mdui: mdui,
         localStar: [],
         localHistory: [],
         picked: 'planB',
@@ -36,74 +35,22 @@ var app = new Vue({
 
     methods: {
         parseApi: function (type) {
+        	    this.clearResponse();
                 //错误处理
+                if (!app.Purl) return false;
                 if (app.Ppage < 1) {
                     app.Ppage = 1;
                     return false;
                 }
                 app.showHotTags = false;
-                var date = '';
-                var typeModeA = ['member_illust', 'favorite', 'related', 'rank', 'search'];
-                var typeModeB = ['following', 'follower'];
-                //判断输入type
-                switch (type) {
-                case "typeA":
-                    //若查询数组a
-                    if (!app.Ptype.length) {
-                        mdui.alert("必须指定type!");
-                        return false
-                    }
-                    if (typeModeB.indexOf(app.Ptype) === -1) app.Ppage = 1;
-                    app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid + '&page=' + app.Ppage;
-                    break;
-                case "search":
-                    //若搜索关键词
-                    if (app.PmodeSearch == 0) {
-                        mdui.alert("必须指定mode!");
-                        return false
-                    }
-                    app.Ptype = 'search';
-                    app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=search&mode=' + app.PmodeSearch + '&order=' + app.Porder + '&word=' + app.Pkey + '&page=' + app.Ppage;
-                    break;
-                case "rank":
-                    //若查询排行榜
-                    app.Ptype = 'rank';
-                    app.Ppage = 1;
-                    app.Pid = '';
-                    date = '&date=' + app.Pdate;
-                    app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=rank&mode=' + app.PmodeRank + date;
-                    break;
-                case "illust":
-                    //若查询插画
-                    app.Ptype = 'illust';
-                    app.Ppage = 1;
-                    app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=illust&id=' + app.Pid;
-                    break;
-                case "member":
-                    //若查询画师
-                    app.Ptype = 'member';
-                    app.Ppage = 1;
-                    app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=member&id=' + app.Pid;
-                    break;
-                default:
-                    //默认，也就是翻页
-                    if (app.Ptype === 'search') {
-                        app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=search&mode=' + app.PmodeSearch + '&order=' + app.Porder + '&word=' + app.Pkey + '&page=' + app.Ppage;
-                    } else {
-                        app.Purl = 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid + '&page=' + app.Ppage;
-                    }
-                }
 
-
+                const typeModeA = ['member_illust', 'favorite', 'related', 'rank', 'search'];
+                const typeModeB = ['following', 'follower'];
                 //若直接输入api
                 if (typeof arguments[1] !== "undefined") {
                     app.Purl = arguments[1];
-                    app.Ptype = parseUrl(app.Purl).type;
-                    app.Pmode = parseUrl(app.Purl).mode;
-                    app.Pid = parseUrl(app.Purl).id;
                 }
                 //保存记录到localStorage
-                if (app.Purl === "") return false;
                 try {
                     addHistory(app.Purl);
                     location.assign("#" + app.Purl);
@@ -117,19 +64,20 @@ var app = new Vue({
                 axios.get(app.Purl).then(function (response) {
                         //关闭loadingBox
                         loadingBox.close();
+                        location.hash = location.hash.replace('&mdui-dialog', '');
                         location.hash = location.hash.replace('mdui-dialog', '');
                         //简单错误处理
                         if (JSON.stringify(response.data).length < 38) mdui.alert("请求可能失败，或者为空<br />出错json：<br />" + JSON.stringify(response.data));
 
                         if (response.data.hasOwnProperty("error")) {
-                            app.Perror = response.data.error.message;
+                            app.Perror += response.data.error.message;
                             mdui.alert(app.Perror);
                             leftDrawer.open();
                         }
                         if (app.Ptype === "illust") {
                             let illust = arrayAddProxy(response.data.illust);
-                            let content, url;
-                            if (illust.hasOwnProperty("meta_single_page")) {
+                            let content=url='';
+                            if (!illust.meta_pages.length>0) {
                                 content = `<img src="${illust.meta_single_page.original_image_url}" alt="加载失败">`;
                                 url = `<a href="${illust.meta_single_page.original_image_url}">${illust.meta_single_page.original_image_url}</a>`;
                             } else {
@@ -138,6 +86,7 @@ var app = new Vue({
                                     url += `<br /><a href="${illust.meta_pages[o].image_urls.original}">${illust.meta_pages[o].image_urls.original}</a>`;
                                 }
                             }
+
                             let output = `<div class="mdui-typo"><h1>${illust.title}</h1>
 <br />画师：${illust.user.name}｜${illust.user.id} <br />${content}
 <br />说明：${illust.caption}
@@ -180,6 +129,7 @@ var app = new Vue({
                     //错误处理待定
 
                 .catch(function (error) {
+                    loadingBox.close();
                     leftDrawer.open();
                     app.Perror = error;
                     mdui.alert(app.Perror);
@@ -203,13 +153,13 @@ var app = new Vue({
                 app.PresponseB = '';
                 app.PresponseC = '';
                 app.showHotTags = false;
-                mdui.snackbar({
-                    message: '成功！',
+                /*mdui.snackbar({
+                    message: '清除原数据成功！',
                     position: 'right-top'
-                });
+                });*/
             }
     },
-    watch: { //监控变量
+    watch: { //监听变量
         Ptype: function (nval, oval) {
                 if (nval == 'search' || nval == 'following') {
                     app.isDisabled = false
@@ -236,10 +186,88 @@ var app = new Vue({
                 if (oval != nval) localStorage.showDetailMsg = app.showDetailMsg;
             }
 
+    },
+
+computed: {
+    Purl: {
+      // getter
+      get: function () {
+
+                switch (this.Ptype) {
+                	case 'related':
+                    case 'favorite':
+                    case 'member_illust':
+                    return 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid;
+                    break;
+                case "following":
+                case "follower":
+                if(isNaN(Number(app.Ppage)))app.Ppage=1;
+                    return 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid + '&page=' + app.Ppage;
+                    break;
+                case "search":
+                    //若搜索关键词
+                if(isNaN(Number(app.Ppage)))app.Ppage=1;
+                    return 'https://api.imjad.cn/pixiv/v2/?type=search&mode=' + app.PmodeSearch + '&order=' + app.Porder + '&word=' + app.Pkey + '&page=' + app.Ppage;
+                    break;
+                case "rank":
+                    //若查询排行榜
+                    return 'https://api.imjad.cn/pixiv/v2/?type=rank&mode=' + app.PmodeRank + '&date=' + app.Pdate;
+                    break;
+                case "illust":
+                    //若查询插画
+                    return 'https://api.imjad.cn/pixiv/v2/?type=illust&id=' + app.Pid;
+                    break;
+                case "member":
+                    //若查询画师
+                    return 'https://api.imjad.cn/pixiv/v2/?type=member&id=' + app.Pid;
+                    break;
+                default:
+                //否则为空
+                    return '';
+                }//switch结束
+      },
+      // setter
+      set: function (newUrl) {
+      	let urlObj=parseUrl(newUrl);
+        this.Ptype=urlObj.type;
+        this.Pid=urlObj.id;
+        this.Ppage=urlObj.page;
+        if(isNaN(Number(urlObj.page)))this.Ppage=1;
+        this.Porder=urlObj.order;
+        this.Pdate=urlObj.date;
+        this.Pkey=urlObj.key;
+      }
     }
+  }
 
 });
 //vue配置结束
+
+
+
+
+
+
+
+
+window.onload= function () {
+    //实例化抽屉
+    window.leftDrawer = new mdui.Drawer('#left-drawer');
+    window.loadingBox = new mdui.Dialog('#loading-box');
+    leftDrawer.toggle();
+    restoreUrl();
+  }
+ 
+
+function restoreUrl(){
+    if (location.href.lastIndexOf("#") > -1 && !location.href.includes("#mdui-dialog") && location.hash.length > 7) {
+        leftDrawer.close();
+        location.hash=location.hash.replace('&mdui-dialog','');
+        //刷新时从#后重载
+        app.Purl=location.hash.slice(1);
+        app.parseApi();
+         }
+}
 
 function addHistory(data) {
     app.localHistory.push(data);
@@ -268,12 +296,12 @@ function recovery() {
 }
 
 function parseUrl(url) {
-    var obj = {};
-    var start = url.indexOf("?") + 1;
-    var str = url.substr(start);
-    var arr = str.split("&");
-    for (var i = 0; i < arr.length; i++) {
-        var arr2 = arr[i].split("=");
+    let obj = {};
+    let start = url.indexOf("?") + 1;
+    let str = url.substr(start);
+    let arr = str.split("&");
+    for (let i = 0; i < arr.length; i++) {
+        let arr2 = arr[i].split("=");
         obj[arr2[0]] = arr2[1];
     }
     return obj;
@@ -301,9 +329,10 @@ function showHelp() {
             }
         }]
     });
+    leftDrawer.open();
     localStorage.isFirst = "no"
 }
-app.mdui = mdui;
+
 try { //恢复上次设置
     if (typeof localStorage.isFirst === "undefined") {
         localStorage.Pquality = "medium";
@@ -320,18 +349,6 @@ try { //恢复上次设置
 } catch (e) { //可以本地运行
     console.log("可能不支持localStorage");
     console.error(e)
-}
-
-window.onload = function () {
-    //实例化抽屉
-    window.leftDrawer = new mdui.Drawer('#left-drawer');
-    window.loadingBox = new mdui.Dialog('#loading-box');
-    leftDrawer.open();
-    if (location.href.lastIndexOf("#") > -1 && !location.href.includes("#mdui-dialog") && location.hash.length > 7) {
-        leftDrawer.close();
-        //刷新时从#后重载
-        app.parseApi(null, location.hash.slice(1));
-    }
 }
 
 function arrayAddProxy(arr) { //给对象添加代理
