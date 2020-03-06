@@ -1,3 +1,4 @@
+let $$ = mdui.JQ;
 Vue.use(VueLazyload, {
     preLoad: 1.8,
     error: './src/card.jpg',
@@ -34,15 +35,14 @@ let app = new Vue({
     },
 
     methods: {
-        parseApi: function (type) {
-        	    this.clearResponse();
+        parseApi: $$.throttle(function (type) {
+        	    if (!(app.Ptype=='illust'||app.Ptype=='member'))this.clearResponse();
                 //错误处理
                 if (!app.Purl) return false;
                 if (app.Ppage < 1) {
                     app.Ppage = 1;
                     return false;
                 }
-                app.showHotTags = false;
 
                 const typeModeA = ['member_illust', 'favorite', 'related', 'rank', 'search'];
                 const typeModeB = ['following', 'follower'];
@@ -104,12 +104,11 @@ let app = new Vue({
     <div class="mdui-list-item-avatar"><img src="${user.profile_image_urls.medium}"/></div>
     <div class="mdui-list-item-content">${user.name}｜${user.account}｜${user.id}</div>
   </li>
+  <li class="mdui-list-item mdui-ripple">
+  ${user.comment}
+  </li>
 </ul>`;
                             mdui.alert(output);
-                        } else {
-                            //清空原数据
-                            app.PresponseA = '';
-                            app.PresponseB = '';
                         }
 
                         //判断type，数组在开头
@@ -135,7 +134,7 @@ let app = new Vue({
                     mdui.alert(app.Perror);
                 });
                 //函数结束
-            },
+            },1000),
             getTags: function () {
                 if (app.showHotTags) {
                     axios.get('https://api.imjad.cn/pixiv/v2/?type=tags').then(function (response) {
@@ -153,10 +152,6 @@ let app = new Vue({
                 app.PresponseB = '';
                 app.PresponseC = '';
                 app.showHotTags = false;
-                /*mdui.snackbar({
-                    message: '清除原数据成功！',
-                    position: 'right-top'
-                });*/
             }
     },
     watch: { //监听变量
@@ -194,9 +189,9 @@ computed: {
       get: function () {
 
                 switch (this.Ptype) {
-                	case 'related':
-                    case 'favorite':
-                    case 'member_illust':
+                	case "related":
+                    case "favorite":
+                    case "member_illust":
                     return 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid;
                     break;
                 case "following":
@@ -228,7 +223,7 @@ computed: {
       },
       // setter
       set: function (newUrl) {
-      	let urlObj=parseUrl(newUrl);
+        let urlObj=parseUrl(newUrl);
         this.Ptype=urlObj.type;
         this.Pid=urlObj.id;
         this.Ppage=urlObj.page;
@@ -252,15 +247,32 @@ computed: {
 
 window.onload= function () {
     //实例化抽屉
-    window.leftDrawer = new mdui.Drawer('#left-drawer');
+    window.leftDrawer = new mdui.Drawer('#left-drawer', false);
     window.loadingBox = new mdui.Dialog('#loading-box');
     leftDrawer.toggle();
     restoreUrl();
   }
  
+try { //恢复上次设置
+    if (typeof localStorage.isFirst === "undefined") {
+        localStorage.Pquality = "medium";
+        showHelp();
+    } else {
+        app.picked = localStorage.picked;
+        app.Pquality = localStorage.Pquality;
+        app.isPreview = Bool(localStorage.isPreview);
+        app.showDetailTags = Bool(localStorage.showDetailTags);
+        app.showDetailMsg = Bool(localStorage.showDetailMsg);
+        app.localHistory = JSON.parse(localStorage.history);
+        if (localStorage.star) app.localStar = JSON.parse(localStorage.star);
+    }
+} catch (e) { //可以本地运行
+    console.log("可能不支持localStorage");
+    console.error(e)
+}
 
 function restoreUrl(){
-    if (location.href.lastIndexOf("#") > -1 && !location.href.includes("#mdui-dialog") && location.hash.length > 7) {
+    if (location.href.includes("#") && !location.href.includes("#mdui-dialog") && location.hash.length > 7) {
         leftDrawer.close();
         location.hash=location.hash.replace('&mdui-dialog','');
         //刷新时从#后重载
@@ -319,36 +331,19 @@ function showHelp() {
   本界面通过调用AD's API获取数据
  ，通过代理获取图片<br />
 主要使用Vue和MDUI框架</p>
-<p>打开侧边栏<i class="mdui-icon material-icons">menu</i>进行查询，查询完毕后，侧边栏自动关闭<br />
-底部按钮<i class="mdui-icon material-icons">wallpaper</i><i class="mdui-icon material-icons">visibility</i><i class="mdui-icon material-icons">star</i><i class="mdui-icon material-icons">tune</i>可进行设置<br />若图片无法加载，请修改<i class="mdui-icon material-icons">tune</i><strong>并刷新</strong>
-</p>`,
+<p>打开侧边栏<i class="mdui-icon material-icons">menu</i>进行查询，第一次开启默认打开。<br />
+侧边栏工具<i class="mdui-icon material-icons">wallpaper</i><i class="mdui-icon material-icons">visibility</i><i class="mdui-icon material-icons">star</i><i class="mdui-icon material-icons">tune</i>可进行各种设置<br />若图片无法加载，请修改<i class="mdui-icon material-icons">settings</i><strong>并刷新</strong>
+</p><p>你可以复制当前网页链接，以将页面分享给他人。`,
         buttons: [{
             text: '了解',
             onClick: function (inst) {
-                location.hash = ''
+                location.hash = '';
+                $$.hideOverlay();
             }
         }]
     });
     leftDrawer.open();
     localStorage.isFirst = "no"
-}
-
-try { //恢复上次设置
-    if (typeof localStorage.isFirst === "undefined") {
-        localStorage.Pquality = "medium";
-        showHelp();
-    } else {
-        app.picked = localStorage.picked;
-        app.Pquality = localStorage.Pquality;
-        app.isPreview = Bool(localStorage.isPreview);
-        app.showDetailTags = Bool(localStorage.showDetailTags);
-        app.showDetailMsg = Bool(localStorage.showDetailMsg);
-        app.localHistory = JSON.parse(localStorage.history);
-        if (localStorage.star) app.localStar = JSON.parse(localStorage.star);
-    }
-} catch (e) { //可以本地运行
-    console.log("可能不支持localStorage");
-    console.error(e)
 }
 
 function arrayAddProxy(arr) { //给对象添加代理

@@ -184,6 +184,42 @@
             </div>
             <!--结束控制器-->
             <ul class="mdui-list">
+                <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#myControl'}">
+                    <i class="mdui-list-item-icon mdui-icon material-icons">
+							tune
+						</i>
+                    <div class="mdui-list-item-content">
+                        控制
+                    </div>
+                </li>
+                
+                <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#mySettings'}">
+                    <i class="mdui-list-item-icon mdui-icon material-icons">
+							settings
+						</i>
+                    <div class="mdui-list-item-content">
+                        设置
+                    </div>
+                </li>
+                
+                <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#myHistory'}">
+                    <i class="mdui-list-item-icon mdui-icon material-icons">
+							history
+						</i>
+                    <div class="mdui-list-item-content">
+                        历史
+                    </div>
+                </li>
+                
+                <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#myStar'}">
+                    <i class="mdui-list-item-icon mdui-icon material-icons">
+							star
+						</i>
+                    <div class="mdui-list-item-content">
+                        收藏
+                    </div>
+                </li>
+                
                 <li class="mdui-list-item mdui-ripple" onclick="window.open('https://blog.poo.li/')">
                     <i class="mdui-list-item-icon mdui-icon material-icons">
 							info_outline
@@ -192,6 +228,7 @@
                         关于
                     </div>
                 </li>
+                
                 <li class="mdui-list-item mdui-ripple" onclick="showHelp()">
                     <i class="mdui-list-item-icon mdui-icon material-icons">
 							help_outline
@@ -200,6 +237,7 @@
                         帮助
                     </div>
                 </li>
+                
                 <li class="mdui-list-item mdui-ripple" mdui-drawer-close>
                     <i class="mdui-list-item-icon mdui-icon material-icons">
 							close
@@ -237,7 +275,7 @@
                     </div>
                     <!-- 卡片的媒体内容，可以包含图片、视频等媒体内容，以及标题、副标题 -->
                     <div class="mdui-card-media">
-                        <img v-lazy="illust.image_urls[Pquality]">
+                        <img class="mdui-img-fluid" v-lazy="illust.image_urls[Pquality]">
                         <!-- 卡片中可以包含一个或多个菜单按钮 -->
                         <div class="mdui-card-menu" v-if="showDetailMsg">
                             <button class="mdui-btn mdui-btn-icon mdui-text-color-white" v-on:click='mdui.alert(illust.caption+"<br /><br />原图"+illust.meta_single_page.original_image_url, "细节")'>
@@ -358,7 +396,7 @@
                         <!----嵌套卡片-->
                         <div class="mdui-card" v-for="illust in user.illusts">
                             <div class="mdui-card-media">
-                                <img v-lazy="illust.image_urls[Pquality]" />
+                                <img class="mdui-img-fluid" v-lazy="illust.image_urls[Pquality]" />
                             </div>
                             <div class="mdui-card-primary">
                                 <div class="mdui-card-primary-title">
@@ -431,7 +469,7 @@
                     显示作品标签
                 </div>
                 <div class="mdui-dialog-actions">
-                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close onclick="$$.hideOverlay()">
                         关闭
                     </button>
                 </div>
@@ -452,7 +490,7 @@
                     <button class="mdui-btn mdui-ripple" onclick="localStorage.history='[]';app.localHistory=[];mdui.snackbar({message: '清除成功！',position: 'right-top'});">
                         清空
                     </button>
-                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close onclick="$$.hideOverlay()">
                         关闭
                     </button>
                 </div>
@@ -479,7 +517,7 @@
                     <button class="mdui-btn mdui-ripple" onclick="localStorage.star='[]';app.localStar=[];mdui.snackbar({message: '清除成功！',position: 'right-top'});">
                         清空
                     </button>
-                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close onclick="$$.hideOverlay()">
                         关闭
                     </button>
                 </div>
@@ -536,7 +574,7 @@
                     <br />
                 </div>
                 <div class="mdui-dialog-actions">
-                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close onclick="$$.hideOverlay()">
                         关闭
                     </button>
                 </div>
@@ -555,7 +593,7 @@
                     </div>
                 </div>
                 <div class="mdui-dialog-actions">
-                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close onclick="$$.hideOverlay()">
                         关闭
                     </button>
                 </div>
@@ -576,7 +614,7 @@
                     <button class="mdui-btn mdui-ripple" onclick="localStorage.star=document.getElementById('inputImport').value;app.localStar=JSON.parse(localStorage.star)" mdui-dialog-confirm>
                         保存
                     </button>
-                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close onclick="$$.hideOverlay()">
                         关闭
                     </button>
                 </div>
@@ -625,47 +663,11 @@
                 </button>
             </div>
         </div>
-            <!---底部导航栏-->
-            <div class="mdui-bottom-nav mdui-bottom-nav-text-auto mdui-bottom-nav-fixed mdui-bottom-nav-scroll-hide mdui-color-white">
-                <a href="javascript:void(0);" mdui-dialog="{target: '#myControl'}" class="mdui-ripple mdui-bottom-nav-active">
-                    <i class="mdui-icon material-icons">
-							wallpaper
-						</i>
-                    <label>
-                        控制
-                    </label>
-                </a>
-                <a href="javascript:void(0);" mdui-dialog="{target: '#myHistory'}" class="mdui-ripple">
-                    <i class="mdui-icon material-icons">
-							visibility
-						</i>
-                    <label>
-                        历史
-                    </label>
-                </a>
-                <a href="javascript:void(0);" mdui-dialog="{target: '#myStar'}" class="mdui-ripple">
-                    <i class="mdui-icon material-icons">
-							star
-						</i>
-                    <label>
-                        收藏
-                    </label>
-                </a>
-                <a href="javascript:void(0);" mdui-dialog="{target: '#mySettings'}" class="mdui-ripple">
-                    <i class="mdui-icon material-icons">
-							tune
-						</i>
-                    <label>
-                        设置
-                    </label>
-                </a>
-            </div>
-        </div>
         <!--vue结束-->
     </div>
 </body>
-<!--script src="./src/vconsole.min.js"></script>
-<script>new VConsole()</script-->
+<script src="./src/vconsole.min.js"></script>
+<script>new VConsole()</script>
 <script src="./src/main.js"></script>
 <script>
 	
