@@ -6,7 +6,6 @@ Vue.use(VueLazyload, {
     attempt: 1,
     listenEvents: ['scroll']
 })
-
 let app = new Vue({
     el: '#app',
     data: { //大P开头，表示请求数据
@@ -33,61 +32,58 @@ let app = new Vue({
         showDetailTags: false,
         showDetailMsg: false,
     },
-
     methods: {
-        parseApi: $$.throttle(function (type) {
-        	    if (!(app.Ptype=='illust'||app.Ptype=='member'))this.clearResponse();
-                //错误处理
-                if (!app.Purl) return false;
-                if (app.Ppage < 1) {
-                    app.Ppage = 1;
-                    return false;
-                }
-
-                const typeModeA = ['member_illust', 'favorite', 'related', 'rank', 'search'];
-                const typeModeB = ['following', 'follower'];
-                //若直接输入api
-                if (typeof arguments[1] !== "undefined") {
-                    app.Purl = arguments[1];
-                }
-                //保存记录到localStorage
-                try {
-                    addHistory(app.Purl);
-                    location.assign("#" + app.Purl);
-                } catch (e) {
-                    console.log("可能不支持localStorage");
-                    //console.error(e)
-                }
-                //弹出loadingBox
-                loadingBox.open();
-                //获取数据
-                axios.get(app.Purl).then(function (response) {
-                        //关闭loadingBox
-                        loadingBox.close();
-                        location.hash = location.hash.replace('&mdui-dialog', '');
-                        location.hash = location.hash.replace('mdui-dialog', '');
-                        //简单错误处理
-                        if (JSON.stringify(response.data).length < 38) mdui.alert("请求可能失败，或者为空<br />出错json：<br />" + JSON.stringify(response.data));
-
-                        if (response.data.hasOwnProperty("error")) {
-                            app.Perror += response.data.error.message;
-                            mdui.alert(app.Perror);
-                            leftDrawer.open();
-                        }
-                        if (app.Ptype === "illust") {
-                            let illust = arrayAddProxy(response.data.illust);
-                            let content=url='';
-                            if (!illust.meta_pages.length>0) {
-                                content = `<img src="${illust.meta_single_page.original_image_url}" alt="加载失败">`;
-                                url = `<a href="${illust.meta_single_page.original_image_url}">${illust.meta_single_page.original_image_url}</a>`;
-                            } else {
-                                for (let o = 0; o < illust.meta_pages.length; o++) {
-                                    content += `<img src="${illust.meta_pages[o].image_urls.original}"alt="加载失败">`;
-                                    url += `<br /><a href="${illust.meta_pages[o].image_urls.original}">${illust.meta_pages[o].image_urls.original}</a>`;
-                                }
+        parseApi: function () {
+                function go() {
+                    if (!(app.Ptype == 'illust' || app.Ptype == 'member')) app.clearResponse();
+                    //错误处理
+                    if (!app.Purl) return false;
+                    if (app.Ppage < 1) {
+                        app.Ppage = 1;
+                        return false;
+                    }
+                    const typeModeA = ['member_illust', 'favorite', 'related', 'rank', 'search'];
+                    const typeModeB = ['following', 'follower'];
+                    //若直接输入api
+                    if (typeof arguments[1] !== "undefined") {
+                        app.Purl = arguments[1];
+                    }
+                    //保存记录到localStorage
+                    try {
+                        addHistory(app.Purl);
+                        location.assign("#" + app.Purl);
+                    } catch (e) {
+                        console.log("可能不支持localStorage");
+                        //console.error(e)
+                    }
+                    //弹出loadingBox
+                    loadingBox.open();
+                    //获取数据
+                    axios.get(app.Purl).then(function (response) {
+                            //关闭loadingBox
+                            loadingBox.close();
+                            location.hash = location.hash.replace('&mdui-dialog', '');
+                            location.hash = location.hash.replace('mdui-dialog', '');
+                            //简单错误处理
+                            if (JSON.stringify(response.data).length < 38) mdui.alert("请求可能失败，或者为空<br />出错json：<br />" + JSON.stringify(response.data));
+                            if (response.data.hasOwnProperty("error")) {
+                                app.Perror += response.data.error.message;
+                                mdui.alert(app.Perror);
+                                leftDrawer.open();
                             }
-
-                            let output = `<div class="mdui-typo"><h1>${illust.title}</h1>
+                            if (app.Ptype === "illust") {
+                                let illust = arrayAddProxy(response.data.illust);
+                                let content = url = '';
+                                if (!illust.meta_pages.length > 0) {
+                                    content = `<img src="${illust.meta_single_page.original_image_url}" alt="加载失败">`;
+                                    url = `<a href="${illust.meta_single_page.original_image_url}">${illust.meta_single_page.original_image_url}</a>`;
+                                } else {
+                                    for (let o = 0; o < illust.meta_pages.length; o++) {
+                                        content += `<img src="${illust.meta_pages[o].image_urls.original}"alt="加载失败">`;
+                                        url += `<br /><a href="${illust.meta_pages[o].image_urls.original}">${illust.meta_pages[o].image_urls.original}</a>`;
+                                    }
+                                }
+                                let output = `<div class="mdui-typo"><h1>${illust.title}</h1>
 <br />画师：${illust.user.name}｜${illust.user.id} <br />${content}
 <br />说明：${illust.caption}
 <br />时间：${illust.create_date}
@@ -96,10 +92,10 @@ let app = new Vue({
 <br />收藏数：${illust.total_bookmarks}
 <br />图片url：${url}
 </div>`;
-                            mdui.alert(output);
-                        } else if (app.Ptype === "member") {
-                            let user = arrayAddProxy(response.data.user);
-                            let output = `<ul class="mdui-list">
+                                mdui.alert(output);
+                            } else if (app.Ptype === "member") {
+                                let user = arrayAddProxy(response.data.user);
+                                let output = `<ul class="mdui-list">
   <li class="mdui-list-item mdui-ripple">
     <div class="mdui-list-item-avatar"><img src="${user.profile_image_urls.medium}"/></div>
     <div class="mdui-list-item-content">${user.name}｜${user.account}｜${user.id}</div>
@@ -108,33 +104,42 @@ let app = new Vue({
   ${user.comment}
   </li>
 </ul>`;
-                            mdui.alert(output);
-                        }
-
-                        //判断type，数组在开头
-                        if (typeModeA.includes(app.Ptype)) {
-                            //设置代理,模式A
-                            app.PresponseA = arrayAddProxy(response.data.illusts);
-                        }
-
-                        if (typeModeB.includes(app.Ptype)) {
-                            //设置代理,模式B
-                            app.PresponseB = arrayAddProxy(response.data.user_previews);
-                        }
-
-                        //结束
-                        leftDrawer.close();
-                    })
-                    //错误处理待定
-
-                .catch(function (error) {
-                    loadingBox.close();
-                    leftDrawer.open();
-                    app.Perror = error;
-                    mdui.alert(app.Perror);
-                });
-                //函数结束
-            },1000),
+                                mdui.alert(output);
+                            }
+                            //判断type，数组在开头
+                            if (typeModeA.includes(app.Ptype)) {
+                                //设置代理,模式A
+                                app.PresponseA = arrayAddProxy(response.data.illusts);
+                            }
+                            if (typeModeB.includes(app.Ptype)) {
+                                //设置代理,模式B
+                                app.PresponseB = arrayAddProxy(response.data.user_previews);
+                            }
+                            //结束
+                            leftDrawer.close();
+                        })
+                        //错误处理待定
+                        .catch(function (error) {
+                            loadingBox.close();
+                            leftDrawer.open();
+                            app.Perror = error;
+                            mdui.alert(app.Perror);
+                        });
+                    //函数结束
+                }
+                if (ableToGo) {
+                    go();
+                    ableToGo = false;
+                    setTimeout(() => {
+                        ableToGo = true
+                    }, 1234)
+                } else {
+                    mdui.snackbar({
+                        message: '请勿频繁点击。',
+                        position: 'right-top'
+                    });
+                }
+            },
             getTags: function () {
                 if (app.showHotTags) {
                     axios.get('https://api.imjad.cn/pixiv/v2/?type=tags').then(function (response) {
@@ -180,79 +185,67 @@ let app = new Vue({
             showDetailMsg: function (nval, oval) {
                 if (oval != nval) localStorage.showDetailMsg = app.showDetailMsg;
             }
-
     },
-
-computed: {
-    Purl: {
-      // getter
-      get: function () {
-
-                switch (this.Ptype) {
-                	case "related":
+    computed: {
+        Purl: {
+            // getter
+            get: function () {
+                    switch (this.Ptype) {
+                    case "related":
                     case "favorite":
                     case "member_illust":
-                    return 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid;
-                    break;
-                case "following":
-                case "follower":
-                if(isNaN(Number(app.Ppage)))app.Ppage=1;
-                    return 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid + '&page=' + app.Ppage;
-                    break;
-                case "search":
-                    //若搜索关键词
-                if(isNaN(Number(app.Ppage)))app.Ppage=1;
-                    return 'https://api.imjad.cn/pixiv/v2/?type=search&mode=' + app.PmodeSearch + '&order=' + app.Porder + '&word=' + app.Pkey + '&page=' + app.Ppage;
-                    break;
-                case "rank":
-                    //若查询排行榜
-                    return 'https://api.imjad.cn/pixiv/v2/?type=rank&mode=' + app.PmodeRank + '&date=' + app.Pdate;
-                    break;
-                case "illust":
-                    //若查询插画
-                    return 'https://api.imjad.cn/pixiv/v2/?type=illust&id=' + app.Pid;
-                    break;
-                case "member":
-                    //若查询画师
-                    return 'https://api.imjad.cn/pixiv/v2/?type=member&id=' + app.Pid;
-                    break;
-                default:
-                //否则为空
-                    return '';
-                }//switch结束
-      },
-      // setter
-      set: function (newUrl) {
-        let urlObj=parseUrl(newUrl);
-        this.Ptype=urlObj.type;
-        this.Pid=urlObj.id;
-        this.Ppage=urlObj.page;
-        if(isNaN(Number(urlObj.page)))this.Ppage=1;
-        this.Porder=urlObj.order;
-        this.Pdate=urlObj.date;
-        this.Pkey=urlObj.key;
-      }
+                        return 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid;
+                        break;
+                    case "following":
+                    case "follower":
+                        if (isNaN(Number(app.Ppage))) app.Ppage = 1;
+                        return 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid + '&page=' + app.Ppage;
+                        break;
+                    case "search":
+                        //若搜索关键词
+                        if (isNaN(Number(app.Ppage))) app.Ppage = 1;
+                        return 'https://api.imjad.cn/pixiv/v2/?type=search&mode=' + app.PmodeSearch + '&order=' + app.Porder + '&word=' + app.Pkey + '&page=' + app.Ppage;
+                        break;
+                    case "rank":
+                        //若查询排行榜
+                        return 'https://api.imjad.cn/pixiv/v2/?type=rank&mode=' + app.PmodeRank + '&date=' + app.Pdate;
+                        break;
+                    case "illust":
+                        //若查询插画
+                        return 'https://api.imjad.cn/pixiv/v2/?type=illust&id=' + app.Pid;
+                        break;
+                    case "member":
+                        //若查询画师
+                        return 'https://api.imjad.cn/pixiv/v2/?type=member&id=' + app.Pid;
+                        break;
+                    default:
+                        //否则为空
+                        return '';
+                    } //switch结束
+                },
+                // setter
+                set: function (newUrl) {
+                    let urlObj = parseUrl(newUrl);
+                    this.Ptype = urlObj.type;
+                    this.Pid = urlObj.id;
+                    this.Ppage = urlObj.page;
+                    if (isNaN(Number(urlObj.page))) this.Ppage = 1;
+                    this.Porder = urlObj.order;
+                    this.Pdate = urlObj.date;
+                    this.Pkey = urlObj.key;
+                }
+        }
     }
-  }
-
 });
 //vue配置结束
-
-
-
-
-
-
-
-
-window.onload= function () {
+let ableToGo = true;
+window.onload = function () {
     //实例化抽屉
     window.leftDrawer = new mdui.Drawer('#left-drawer', false);
     window.loadingBox = new mdui.Dialog('#loading-box');
     leftDrawer.toggle();
     restoreUrl();
-  }
- 
+}
 try { //恢复上次设置
     if (typeof localStorage.isFirst === "undefined") {
         localStorage.Pquality = "medium";
@@ -271,14 +264,14 @@ try { //恢复上次设置
     console.error(e)
 }
 
-function restoreUrl(){
+function restoreUrl() {
     if (location.href.includes("#") && !location.href.includes("#mdui-dialog") && location.hash.length > 7) {
         leftDrawer.close();
-        location.hash=location.hash.replace('&mdui-dialog','');
+        location.hash = location.hash.replace('&mdui-dialog', '');
         //刷新时从#后重载
-        app.Purl=location.hash.slice(1);
+        app.Purl = location.hash.slice(1);
         app.parseApi();
-         }
+    }
 }
 
 function addHistory(data) {
@@ -351,20 +344,15 @@ function arrayAddProxy(arr) { //给对象添加代理
     case 'planA':
         var url = JSON.stringify(arr).replace(/https:\/\/i.pximg/g, "http://pixiv.dns.navy/view.php/https://i.pximg");
         break;
-
     case 'planB':
         var url = JSON.stringify(arr).replace(/https:\/\/i.pximg.net/g, "https://www.moe123.net/api/imageproxy");
         break;
-
     case 'planC':
         var url = JSON.stringify(arr).replace(/https:\/\/i.pximg/g, "http://i.kka.pub/PixivViewer/view.php/https://i.pximg");
         break;
-
     case 'planD':
         var url = JSON.stringify(arr).replace(/i.pximg.net/g, "i.pixiv.cat");
         break;
-
-
     default:
         var url = JSON.stringify(arr).replace(/i.pximg.net/g, "www.moe123.net/api/imageproxy");
     }

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
     <title>
         PixivViewer
     </title>
@@ -27,7 +27,7 @@
         <!--vue开始-->
         <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-toolbar-hide">
             <div class="mdui-toolbar mdui-color-theme">
-                <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-drawer="{target: '#left-drawer'}">
+                <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-drawer="{target: '#left-drawer'}" onclick="$$.hideOverlay()">
                     <i class="mdui-icon material-icons">
 							menu
 						</i>
@@ -51,7 +51,9 @@
         </div>
         <!--上面导航栏-->
         <div class="mdui-drawer" id="left-drawer">
-            <a href="./"><img src="./src/logo.png" /></a>
+            <a href="./">
+                <img src="./src/logo.png" />
+            </a>
             <div class="config">
                 <div class="mdui-tab" mdui-tab>
                     <a href="#example1-tab1" class="mdui-ripple">查询id</a>
@@ -192,7 +194,7 @@
                         控制
                     </div>
                 </li>
-                
+
                 <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#mySettings'}">
                     <i class="mdui-list-item-icon mdui-icon material-icons">
 							settings
@@ -201,7 +203,7 @@
                         设置
                     </div>
                 </li>
-                
+
                 <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#myHistory'}">
                     <i class="mdui-list-item-icon mdui-icon material-icons">
 							history
@@ -210,7 +212,7 @@
                         历史
                     </div>
                 </li>
-                
+
                 <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#myStar'}">
                     <i class="mdui-list-item-icon mdui-icon material-icons">
 							star
@@ -219,7 +221,7 @@
                         收藏
                     </div>
                 </li>
-                
+
                 <li class="mdui-list-item mdui-ripple" onclick="window.open('https://blog.poo.li/')">
                     <i class="mdui-list-item-icon mdui-icon material-icons">
 							info_outline
@@ -228,7 +230,7 @@
                         关于
                     </div>
                 </li>
-                
+
                 <li class="mdui-list-item mdui-ripple" onclick="showHelp()">
                     <i class="mdui-list-item-icon mdui-icon material-icons">
 							help_outline
@@ -237,7 +239,7 @@
                         帮助
                     </div>
                 </li>
-                
+
                 <li class="mdui-list-item mdui-ripple" mdui-drawer-close>
                     <i class="mdui-list-item-icon mdui-icon material-icons">
 							close
@@ -619,61 +621,71 @@
                     </button>
                 </div>
             </div>
-        <!--错误-->
-        <div style="height:5px">
-        </div>
-        <div class="mdui-card" v-if="Perror">
-            <div class="mdui-card-media">
-                <img src="./src/card.jpg" />
-                <div class="mdui-card-media-covered">
-                    <div class="mdui-card-primary">
-                        <div class="mdui-card-primary-title">
-                            出错
-                        </div>
-                        <div class="mdui-card-primary-subtitle">
-                            error
-                        </div>
-                    </div>
-                </div>
+            <!--错误-->
+            <div style="height:5px">
             </div>
-            <div class="mdui-card-actions">
-                <button class="mdui-btn mdui-ripple" v-on:click="Perror=false">
-                    关闭
-                </button>
-            </div>
-        </div>
-        <!--空-->
-        <div class="mdui-card" v-if="!(PresponseA||PresponseB||PresponseC)">
-            <div class="mdui-card-media">
-                <img src="./src/card.jpg" />
-                <div class="mdui-card-media-covered">
-                    <div class="mdui-card-primary">
-                        <div class="mdui-card-primary-title">
-                            输出为空
-                        </div>
-                        <div class="mdui-card-primary-subtitle">
-                            blank
+            <div class="mdui-card" v-if="Perror">
+                <div class="mdui-card-media">
+                    <img src="./src/card.jpg" />
+                    <div class="mdui-card-media-covered">
+                        <div class="mdui-card-primary">
+                            <div class="mdui-card-primary-title">
+                                出错
+                            </div>
+                            <div class="mdui-card-primary-subtitle">
+                                error
+                            </div>
                         </div>
                     </div>
                 </div>
+                <div class="mdui-card-actions">
+                    <button class="mdui-btn mdui-ripple" v-on:click="Perror=false">
+                        关闭
+                    </button>
+                </div>
             </div>
-            <div class="mdui-card-actions">
-                <button class="mdui-btn mdui-ripple" v-on:click="PresponseC=true">
-                    关闭
-                </button>
+            <!--空-->
+            <div class="mdui-card" v-if="!(PresponseA||PresponseB||PresponseC)">
+                <div class="mdui-card-media">
+                    <img src="./src/card.jpg" />
+                    <div class="mdui-card-media-covered">
+                        <div class="mdui-card-primary">
+                            <div class="mdui-card-primary-title">
+                                输出为空
+                            </div>
+                            <div class="mdui-card-primary-subtitle">
+                                blank
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mdui-card-actions">
+                    <button class="mdui-btn mdui-ripple" v-on:click="PresponseC=true">
+                        关闭
+                    </button>
+                </div>
             </div>
+            <!--vue结束-->
         </div>
-        <!--vue结束-->
-    </div>
 </body>
-<script src="./src/vconsole.min.js"></script>
-<script>new VConsole()</script>
+<script>
+function loadScript(src, callback) {
+    let script = document.createElement('script');
+    script.src = src;
+    script.onload = () => callback(script);
+    document.head.append(script);
+}
+if (location.href.includes('vconsole')) {
+    loadScript('./src/vconsole.min.js', script => {
+        new VConsole();
+    });
+}
+</script>
 <script src="./src/main.js"></script>
 <script>
-	
     /*统计*/
     var _mtac = {};
-    (function() {
+    (function () {
         var mta = document.createElement("script");
         mta.src = "//pingjs.qq.com/h5/stats.js?v2.0.4";
         mta.setAttribute("name", "MTAH5");
