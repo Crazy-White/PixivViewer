@@ -15,7 +15,7 @@
     <link href="./src/flex.css" rel="stylesheet" />
 </head>
 
-<body class="mdui-theme-primary-teal mdui-theme-accent-pink mdui-appbar-with-toolbar mdui-drawer-body-left mdui-bottom-nav-fixed">
+<body class="mdui-drawer-body-left mdui-appbar-with-toolbar  mdui-theme-primary-teal mdui-theme-accent-pink">
     <!--加载框-->
     <div class="mdui-dialog" id="loading-box">
         <div class="mdui-dialog-content">
@@ -25,9 +25,9 @@
 
     <div id="app">
         <!--vue开始-->
-        <div class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-toolbar-hide">
+        <header class="mdui-appbar mdui-appbar-fixed mdui-appbar-scroll-toolbar-hide">
             <div class="mdui-toolbar mdui-color-theme">
-                <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-drawer="{target: '#left-drawer'}" onclick="$$.hideOverlay()">
+                <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-drawer="{target: '#left-drawer', swipe: true}">
                     <i class="mdui-icon material-icons">
 							menu
 						</i>
@@ -37,20 +37,19 @@
 					</a>
                 <div class="mdui-toolbar-spacer">
                 </div>
-                <a href="javascript:history.go(-3);restoreUrl()" class="mdui-btn mdui-btn-icon">
+                <a href="javascript:app.clearResponse();app.parseApi()" class="mdui-btn mdui-btn-icon" mdui-tooltip="{content: '重载'}">
+                    <i class="mdui-icon material-icons">
+							refresh
+						</i>
+                </a>
+                <a href="javascript:app.Purl=app.localHistory[this.length];app.parseApi()" class="mdui-btn mdui-btn-icon" mdui-tooltip="{content: '回退'}">
                     <i class="mdui-icon material-icons">
 							keyboard_arrow_left
 						</i>
                 </a>
-                <a href="javascript:history.go(3);restoreUrl()" class="mdui-btn mdui-btn-icon">
-                    <i class="mdui-icon material-icons">
-							keyboard_arrow_right
-						</i>
-                </a>
             </div>
-        </div>
-        <!--上面导航栏-->
-        <div class="mdui-drawer" id="left-drawer">
+        </header>
+        <div class="mdui-drawer mdui-drawer-open" id="left-drawer">
             <a href="./">
                 <img src="./src/logo.png" />
             </a>
@@ -186,24 +185,6 @@
             </div>
             <!--结束控制器-->
             <ul class="mdui-list">
-                <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#myControl'}">
-                    <i class="mdui-list-item-icon mdui-icon material-icons">
-							tune
-						</i>
-                    <div class="mdui-list-item-content">
-                        控制
-                    </div>
-                </li>
-
-                <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#mySettings'}">
-                    <i class="mdui-list-item-icon mdui-icon material-icons">
-							settings
-						</i>
-                    <div class="mdui-list-item-content">
-                        设置
-                    </div>
-                </li>
-
                 <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#myHistory'}">
                     <i class="mdui-list-item-icon mdui-icon material-icons">
 							history
@@ -219,6 +200,24 @@
 						</i>
                     <div class="mdui-list-item-content">
                         收藏
+                    </div>
+                </li>
+
+                <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#myControl'}">
+                    <i class="mdui-list-item-icon mdui-icon material-icons">
+							tune
+						</i>
+                    <div class="mdui-list-item-content">
+                        控制
+                    </div>
+                </li>
+
+                <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#mySettings'}">
+                    <i class="mdui-list-item-icon mdui-icon material-icons">
+							settings
+						</i>
+                    <div class="mdui-list-item-content">
+                        设置
                     </div>
                 </li>
 
@@ -250,7 +249,7 @@
                 </li>
             </ul>
         </div>
-        <!-上面抽屉-->
+        <!--上面抽屉-->
         <div class="mdui-container">
             <div v-for="tag in PresponseC" class="mdui-chip" v-on:click="Pkey=tag.tag;PmodeSearch='partial_match_for_tags';">
                 <span class="mdui-chip-icon">
@@ -434,15 +433,23 @@
                 </div>
                 <div class="mdui-dialog-content">
                     当前API：{{Purl}}
-                    <div class="-mdui-btn-group">
-                        <button v-on:click="clearResponse()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
-                            清空输出
-                        </button>
-                        <button onclick="recovery()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
-                            变量初始化(出错时使用)
-                        </button>
-                    </div>
                     <br />
+                    <button v-on:click="clearResponse()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
+                        清空输出
+                    </button>
+                    <button onclick="recovery()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
+                        变量初始化(出错时使用)
+                    </button>
+                    <br />
+                    <br />
+                    <span>图片排序方式(搜索后使用)</span>
+                    <br />
+                    <button v-on:click="sortResponse('star')" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">按收藏次数</button>
+                    <button v-on:click="sortResponse('view')" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">按查看次数</button>
+                    <button v-on:click="sortResponse('per')" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">按收藏率</button>
+                    <button v-on:click="sortResponse('reverse')" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">反转顺序</button>
+                    <br />
+                    <br/>
                     <div class="mdui-divider">
                     </div>
                     <label class="mdui-checkbox">
@@ -471,7 +478,7 @@
                     显示作品标签
                 </div>
                 <div class="mdui-dialog-actions">
-                    <button class="mdui-btn mdui-ripple" mdui-dialog-close onclick="$$.hideOverlay()">
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
                         关闭
                     </button>
                 </div>
@@ -483,7 +490,7 @@
                 </div>
                 <div class="mdui-dialog-content">
                     <div class="mdui-list" v-for="url in localHistory">
-                        <a v-on:click="parseApi(null,url)" class="mdui-list-item mdui-ripple">
+                        <a v-on:click="parseApi(url)" class="mdui-list-item mdui-ripple">
 								{{url}}
 							</a>
                     </div>
@@ -492,7 +499,7 @@
                     <button class="mdui-btn mdui-ripple" onclick="localStorage.history='[]';app.localHistory=[];mdui.snackbar({message: '清除成功！',position: 'right-top'});">
                         清空
                     </button>
-                    <button class="mdui-btn mdui-ripple" mdui-dialog-close onclick="$$.hideOverlay()">
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
                         关闭
                     </button>
                 </div>
@@ -504,7 +511,7 @@
                 </div>
                 <div class="mdui-dialog-content">
                     <div class="mdui-list" v-for="url in localStar">
-                        <a v-on:click="parseApi(null,url)" class="mdui-list-item mdui-ripple">
+                        <a v-on:click="parseApi(url)" class="mdui-list-item mdui-ripple">
 								{{url}}
 							</a>
                     </div>
@@ -519,7 +526,7 @@
                     <button class="mdui-btn mdui-ripple" onclick="localStorage.star='[]';app.localStar=[];mdui.snackbar({message: '清除成功！',position: 'right-top'});">
                         清空
                     </button>
-                    <button class="mdui-btn mdui-ripple" mdui-dialog-close onclick="$$.hideOverlay()">
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
                         关闭
                     </button>
                 </div>
@@ -576,7 +583,7 @@
                     <br />
                 </div>
                 <div class="mdui-dialog-actions">
-                    <button class="mdui-btn mdui-ripple" mdui-dialog-close onclick="$$.hideOverlay()">
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
                         关闭
                     </button>
                 </div>
@@ -595,7 +602,7 @@
                     </div>
                 </div>
                 <div class="mdui-dialog-actions">
-                    <button class="mdui-btn mdui-ripple" mdui-dialog-close onclick="$$.hideOverlay()">
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
                         关闭
                     </button>
                 </div>
@@ -616,7 +623,7 @@
                     <button class="mdui-btn mdui-ripple" onclick="localStorage.star=document.getElementById('inputImport').value;app.localStar=JSON.parse(localStorage.star)" mdui-dialog-confirm>
                         保存
                     </button>
-                    <button class="mdui-btn mdui-ripple" mdui-dialog-close onclick="$$.hideOverlay()">
+                    <button class="mdui-btn mdui-ripple" mdui-dialog-close>
                         关闭
                     </button>
                 </div>
@@ -669,17 +676,17 @@
         </div>
 </body>
 <script>
-function loadScript(src, callback) {
-    let script = document.createElement('script');
-    script.src = src;
-    script.onload = () => callback(script);
-    document.head.append(script);
-}
-if (location.href.includes('vconsole')) {
-    loadScript('./src/vconsole.min.js', script => {
-        new VConsole();
-    });
-}
+    function loadScript(src, callback) {
+        let script = document.createElement('script');
+        script.src = src;
+        script.onload = () => callback(script);
+        document.head.append(script);
+    }
+    if (location.href.includes('vconsole')) {
+        loadScript('./src/vconsole.min.js', script => {
+            new VConsole();
+        });
+    }
 </script>
 <script src="./src/main.js"></script>
 <script>

@@ -45,8 +45,8 @@ let app = new Vue({
                     const typeModeA = ['member_illust', 'favorite', 'related', 'rank', 'search'];
                     const typeModeB = ['following', 'follower'];
                     //若直接输入api
-                    if (typeof arguments[1] !== "undefined") {
-                        app.Purl = arguments[1];
+                    if (typeof arguments[0] !== "undefined") {
+                        app.Purl = arguments[0];
                     }
                     //保存记录到localStorage
                     try {
@@ -125,14 +125,15 @@ let app = new Vue({
                             app.Perror = error;
                             mdui.alert(app.Perror);
                         });
-                    //函数结束
+                    mdui.mutation()
+                        //函数结束
                 }
                 if (ableToGo) {
                     go();
                     ableToGo = false;
                     setTimeout(() => {
                         ableToGo = true
-                    }, 1234)
+                    }, 3000)
                 } else {
                     mdui.snackbar({
                         message: '请勿频繁点击。',
@@ -157,6 +158,37 @@ let app = new Vue({
                 app.PresponseB = '';
                 app.PresponseC = '';
                 app.showHotTags = false;
+            },
+            sortResponse: function (method) {
+                if (!Array.isArray(app.PresponseA)) return false;
+
+                function sortByPer(a, b) {
+                    let perA = a.total_bookmarks / a.total_view;
+                    let perB = b.total_bookmarks / b.total_view;
+                    return perB - perA;
+                }
+                let sortByStar = (a, b) => b.total_bookmarks - a.total_bookmarks;
+                let sortByView = (a, b) => b.total_view - a.total_view;
+                switch (method) {
+                case "reverse":
+                    app.PresponseA = app.Presponse.A.reverse();
+                    break;
+
+                case "per":
+                    app.PresponseA.sort(sortByPer);
+                    break;
+
+                case "star":
+                    app.PresponseA.sort(sortByStar);
+                    break;
+
+                case "view":
+                    app.PresponseA.sort(sortByView);
+                    break;
+
+                default:
+                    return false;
+                }
             }
     },
     watch: { //监听变量
@@ -232,18 +264,21 @@ let app = new Vue({
                     if (isNaN(Number(urlObj.page))) this.Ppage = 1;
                     this.Porder = urlObj.order;
                     this.Pdate = urlObj.date;
-                    this.Pkey = urlObj.key;
+                    this.Pkey = urlObj.word;
                 }
         }
     }
 });
 //vue配置结束
 let ableToGo = true;
+$$('.mdui-dialog').on('closed.mdui.dialog opened.mdui.drawer open.mdui.drawer', function (e) {
+    $$.hideOverlay();
+});
 window.onload = function () {
     //实例化抽屉
     window.leftDrawer = new mdui.Drawer('#left-drawer', false);
     window.loadingBox = new mdui.Dialog('#loading-box');
-    leftDrawer.toggle();
+    //leftDrawer.toggle();
     restoreUrl();
 }
 try { //恢复上次设置
@@ -326,7 +361,7 @@ function showHelp() {
 主要使用Vue和MDUI框架</p>
 <p>打开侧边栏<i class="mdui-icon material-icons">menu</i>进行查询，第一次开启默认打开。<br />
 侧边栏工具<i class="mdui-icon material-icons">wallpaper</i><i class="mdui-icon material-icons">visibility</i><i class="mdui-icon material-icons">star</i><i class="mdui-icon material-icons">tune</i>可进行各种设置<br />若图片无法加载，请修改<i class="mdui-icon material-icons">settings</i><strong>并刷新</strong>
-</p><p>你可以复制当前网页链接，以将页面分享给他人。`,
+</p><p><i>若出现白屏，搜索后无输出，刷新即可。</i></p><p>你可以复制当前网页链接，以将页面分享给他人。`,
         buttons: [{
             text: '了解',
             onClick: function (inst) {
