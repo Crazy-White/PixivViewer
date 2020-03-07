@@ -133,10 +133,10 @@ let app = new Vue({
                     ableToGo = false;
                     setTimeout(() => {
                         ableToGo = true
-                    }, 3000)
+                    }, 5000)
                 } else {
                     mdui.snackbar({
-                        message: '请勿频繁点击。',
+                        message: '请勿频繁点击。频率为5s/次',
                         position: 'right-top'
                     });
                 }
@@ -171,7 +171,7 @@ let app = new Vue({
                 let sortByView = (a, b) => b.total_view - a.total_view;
                 switch (method) {
                 case "reverse":
-                    app.PresponseA = app.Presponse.A.reverse();
+                    app.PresponseA = app.PresponseA.reverse();
                     break;
 
                 case "per":
