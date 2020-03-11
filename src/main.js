@@ -37,9 +37,17 @@ let app = new Vue({
                 function go() {
                     if (!(app.Ptype == 'illust' || app.Ptype == 'member')) app.clearResponse();
                     //错误处理
-                    if (!app.Purl) return false;
+                    if (!app.Purl) {
+                        mdui.snackbar({
+                            message: '配置错误！',
+                            position: 'right-top'
+                        });
+                        ableToGo = true;
+                        return false;
+                    }
                     if (app.Ppage < 1) {
                         app.Ppage = 1;
+                        ableToGo = true;
                         return false;
                     }
                     const typeModeA = ['member_illust', 'favorite', 'related', 'rank', 'search'];
@@ -65,7 +73,7 @@ let app = new Vue({
                             location.hash = location.hash.replace('&mdui-dialog', '');
                             location.hash = location.hash.replace('mdui-dialog', '');
                             //简单错误处理
-                            if (JSON.stringify(response.data).length < 38) mdui.alert("请求可能失败，或者为空<br />出错json：<br />" + JSON.stringify(response.data));
+                            if (JSON.stringify(response.data).length < 39) mdui.alert("请求可能失败，或者为空<p>出错json：<strong>" + JSON.stringify(response.data) + "</strong></p><p>这一般是配置有误造成的</p>");
                             if (response.data.hasOwnProperty("error")) {
                                 app.Perror += response.data.error.message;
                                 mdui.alert(app.Perror);
@@ -136,7 +144,7 @@ let app = new Vue({
                     }, 5000)
                 } else {
                     mdui.snackbar({
-                        message: '请勿频繁点击。频率为5s/次',
+                        message: '请勿频繁点击。频率为0.2次/s',
                         position: 'right-top'
                     });
                 }
@@ -273,12 +281,13 @@ let app = new Vue({
 let ableToGo = true;
 $$('.mdui-dialog').on('closed.mdui.dialog opened.mdui.drawer open.mdui.drawer', function (e) {
     $$.hideOverlay();
+    location.hash = location.hash.replace('&mdui-dialog', '');
+    location.hash = location.hash.replace('#mdui-dialog', '');
 });
 window.onload = function () {
     //实例化抽屉
-    window.leftDrawer = new mdui.Drawer('#left-drawer', false);
+    window.leftDrawer = new mdui.Drawer('#left-drawer');
     window.loadingBox = new mdui.Dialog('#loading-box');
-    //leftDrawer.toggle();
     restoreUrl();
 }
 try { //恢复上次设置
@@ -353,6 +362,7 @@ function Bool(val) {
 }
 
 function showHelp() {
+    localStorage.isFirst = "no";
     mdui.dialog({
         title: '使用说明',
         content: `<p>
@@ -370,8 +380,6 @@ function showHelp() {
             }
         }]
     });
-    leftDrawer.open();
-    localStorage.isFirst = "no"
 }
 
 function arrayAddProxy(arr) { //给对象添加代理

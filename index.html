@@ -54,13 +54,13 @@
                 <img src="./src/logo.png" />
             </a>
             <div class="config">
-                <div class="mdui-tab" mdui-tab>
+                <div class="mdui-tab mdui-tab-full-width" mdui-tab>
                     <a href="#example1-tab1" class="mdui-ripple">查询id</a>
                     <a href="#example1-tab2" class="mdui-ripple">查询关键词</a>
                     <a href="#example1-tab3" class="mdui-ripple">查询排行榜</a>
                 </div>
                 <div id="example1-tab1" class="mdui-p-a-2">
-                    <input v-model.number="Pid" class="mdui-textfield-input" type="number" placeholder="输入id...">
+                    <input v-model.number="Pid" class="mdui-textfield-input" type="number" placeholder="输入id..." @keyup.enter="parseApi()">
 
                     <select v-model="Ptype" class="mdui-select" mdui-select>
                         <option value="" disabled>
@@ -91,7 +91,7 @@
                             相关作品
                         </option>
                     </select>&nbsp;
-                    <button class="mdui-btn mdui-btn-icon mdui-btn-raised mdui-color-theme-accent" v-on:click="parseApi()">
+                    <button class="mdui-btn mdui-btn-icon mdui-btn-raised mdui-color-theme-accent" @click="parseApi()">
                         <i class="mdui-icon material-icons">
 							search
 						</i>
@@ -124,7 +124,7 @@
                             按日期正序
                         </option>
                     </select>
-                    <button class="mdui-btn mdui-btn-icon mdui-btn-raised mdui-color-theme-accent" v-on:click="app.Ptype='search';parseApi()">
+                    <button class="mdui-btn mdui-btn-icon mdui-btn-raised mdui-color-theme-accent" @click="app.Ptype='search';parseApi()">
                         <i class="mdui-icon material-icons">
 							search
 						</i>
@@ -157,8 +157,8 @@
                             女性向
                         </option>
                     </select>
-                    <input class="mdui-select" type="date" min="2006-12-31" v-model="Pdate">
-                    <button class="mdui-btn mdui-btn-raised mdui-btn-icon mdui-color-theme-accent" v-on:click="app.Ptype='rank';parseApi()">
+                    <input class="mdui-select" type="date" min="2006-12-31" v-model="Pdate" @keyup.enter="app.Ptype='rank';parseApi()">
+                    <button class="mdui-btn mdui-btn-raised mdui-btn-icon mdui-color-theme-accent" @click="app.Ptype='rank';parseApi()">
                         <i class="mdui-icon material-icons">
 							search
 						</i>
@@ -170,13 +170,13 @@
                     <span>
 					  翻页
 					</span>
-                    <button v-on:click="Ppage -= 1;parseApi()" class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-ripple" v-bind:disabled="isDisabled">
+                    <button @click="Ppage -= 1;parseApi()" class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-ripple" v-bind:disabled="isDisabled">
                         <i class="mdui-icon material-icons">
 							chevron_left
 						</i>
                     </button>
                     <input v-model.number="Ppage" class="mdui-textfield-input" type="number" style="max-width:50px;display:inline" placeholder="指定页">
-                    <button v-on:click="Ppage += 1;parseApi()" class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-ripple" v-bind:disabled="isDisabled">
+                    <button @click="Ppage += 1;parseApi()" class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-ripple" v-bind:disabled="isDisabled">
                         <i class="mdui-icon material-icons">
 							chevron_right
 						</i>
@@ -185,21 +185,21 @@
             </div>
             <!--结束控制器-->
             <ul class="mdui-list">
-                <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#myHistory'}">
-                    <i class="mdui-list-item-icon mdui-icon material-icons">
-							history
-						</i>
-                    <div class="mdui-list-item-content">
-                        历史
-                    </div>
-                </li>
-
                 <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#myStar'}">
                     <i class="mdui-list-item-icon mdui-icon material-icons">
 							star
 						</i>
                     <div class="mdui-list-item-content">
                         收藏
+                    </div>
+                </li>
+            
+                <li class="mdui-list-item mdui-ripple" mdui-dialog="{target: '#myHistory'}">
+                    <i class="mdui-list-item-icon mdui-icon material-icons">
+							history
+						</i>
+                    <div class="mdui-list-item-content">
+                        历史
                     </div>
                 </li>
 
@@ -251,7 +251,7 @@
         </div>
         <!--上面抽屉-->
         <div class="mdui-container">
-            <div v-for="tag in PresponseC" class="mdui-chip" v-on:click="Pkey=tag.tag;PmodeSearch='partial_match_for_tags';">
+            <div v-for="tag in PresponseC" class="mdui-chip" @click="Pkey=tag.tag;PmodeSearch='partial_match_for_tags';">
                 <span class="mdui-chip-icon">
 						<i class="mdui-icon material-icons">
 							loyalty
@@ -262,11 +262,11 @@
 					</span>
             </div>
             <!---循环开始A-->
-            <div class="columns" v-if="PresponseA">
+            <div class="columns">
                 <div class="mdui-card column col-6 col-sm-12 col-xs-12" v-for="illust in PresponseA">
                     <!-- 卡片头部，包含头像、标题、副标题 -->
                     <div class="mdui-card-header">
-                        <img class="mdui-card-header-avatar" v-lazy="illust.user.profile_image_urls.medium" v-on:click="Ptype='member';Pid=illust.user.id;parseApi()" />
+                        <img class="mdui-card-header-avatar" v-lazy="illust.user.profile_image_urls.medium" @click="Ptype='member';Pid=illust.user.id;parseApi()" />
                         <div class="mdui-card-header-title">
                             {{illust.user.name}}
                         </div>
@@ -279,7 +279,7 @@
                         <img class="mdui-img-fluid" v-lazy="illust.image_urls[Pquality]">
                         <!-- 卡片中可以包含一个或多个菜单按钮 -->
                         <div class="mdui-card-menu" v-if="showDetailMsg">
-                            <button class="mdui-btn mdui-btn-icon mdui-text-color-white" v-on:click='mdui.alert(illust.caption+"<br /><br />原图"+illust.meta_single_page.original_image_url, "细节")'>
+                            <button class="mdui-btn mdui-btn-icon mdui-text-color-white" @click='mdui.alert(illust.caption+"<br /><br />原图"+illust.meta_single_page.original_image_url, "细节")'>
                                 <i class="mdui-icon material-icons">
 										link
 									</i>
@@ -348,7 +348,7 @@
 								</span>
                         </div>
                         <br />
-                        <div v-for="tag in illust.tags" class="mdui-chip" v-on:click="Pkey=tag.name;PmodeSearch='partial_match_for_tags';">
+                        <div v-for="tag in illust.tags" class="mdui-chip" @click="Pkey=tag.name;PmodeSearch='partial_match_for_tags';">
                             <span class="mdui-chip-icon">
 									<i class="mdui-icon material-icons">
 										loyalty
@@ -361,13 +361,13 @@
                     </div>
                     <!-- 卡片的按钮 -->
                     <div class="mdui-card-actions">
-                        <button class="mdui-btn mdui-ripple" v-on:click="Ptype='member_illust';Pid=illust.user.id;parseApi()">
+                        <button class="mdui-btn mdui-ripple" @click="Ptype='member_illust';Pid=illust.user.id;parseApi()">
                             画师
                         </button>
-                        <button class="mdui-btn mdui-ripple" v-on:click="Ptype='related';Pid=illust.id;parseApi()">
+                        <button class="mdui-btn mdui-ripple" @click="Ptype='related';Pid=illust.id;parseApi()">
                             相关
                         </button>
-                        <button class="mdui-btn mdui-ripple" v-on:click="Ptype='illust';Pid=illust.id;parseApi()">
+                        <button class="mdui-btn mdui-ripple" @click="Ptype='illust';Pid=illust.id;parseApi()">
                             原图
                         </button>
                         <button class="mdui-btn mdui-btn-icon mdui-float-right" onclick="addStar(app.Purl)">
@@ -380,7 +380,7 @@
             </div>
             <!--循环结束A--->
             <!---循环开始B-->
-            <div class="mdui-row-xs-1 mdui-row-sm-2 mdui-row-md-3 mdui-row-lg-4 mdui-row-xl-5 mdui-grid-list" v-if="PresponseB">
+            <div class="mdui-row-xs-1 mdui-row-sm-2 mdui-row-md-3 mdui-row-lg-4 mdui-row-xl-5 mdui-grid-list">
                 <div class="mdui-card mdui-col" v-for="user in PresponseB">
                     <!-- 卡片头部，包含头像、标题、副标题 -->
                     <div class="mdui-card-header">
@@ -411,10 +411,10 @@
                     </div>
                     <!-- 卡片的按钮 -->
                     <div class="mdui-card-actions">
-                        <button class="mdui-btn mdui-ripple" v-on:click="Ptype='member_illust';Pid=user.user.id;parseApi()">
+                        <button class="mdui-btn mdui-ripple" @click="Ptype='member_illust';Pid=user.user.id;parseApi()">
                             TA的作品
                         </button>
-                        <button class="mdui-btn mdui-ripple" v-on:click="Ptype='member';Pid=user.user.id;parseApi()">
+                        <button class="mdui-btn mdui-ripple" @click="Ptype='member';Pid=user.user.id;parseApi()">
                             详细
                         </button>
                         <button class="mdui-btn mdui-btn-icon mdui-float-right" onclick="addStar(app.Purl)">
@@ -434,7 +434,7 @@
                 <div class="mdui-dialog-content">
                     当前API：{{Purl}}
                     <br />
-                    <button v-on:click="clearResponse()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
+                    <button @click="clearResponse()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
                         清空输出
                     </button>
                     <button onclick="recovery()" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">
@@ -444,10 +444,10 @@
                     <br />
                     <span>图片排序方式(搜索后使用)</span>
                     <br />
-                    <button v-on:click="sortResponse('star')" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">按收藏次数</button>
-                    <button v-on:click="sortResponse('view')" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">按查看次数</button>
-                    <button v-on:click="sortResponse('per')" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">按收藏率</button>
-                    <button v-on:click="sortResponse('reverse')" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">反转顺序</button>
+                    <button @click="sortResponse('star')" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">按收藏次数</button>
+                    <button @click="sortResponse('view')" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">按查看次数</button>
+                    <button @click="sortResponse('per')" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">按收藏率</button>
+                    <button @click="sortResponse('reverse')" class="mdui-btn mdui-btn-raised mdui-btn-dense mdui-color-theme-accent">反转顺序</button>
                     <br />
                     <br/>
                     <div class="mdui-divider">
@@ -490,7 +490,7 @@
                 </div>
                 <div class="mdui-dialog-content">
                     <div class="mdui-list" v-for="url in localHistory">
-                        <a v-on:click="parseApi(url)" class="mdui-list-item mdui-ripple">
+                        <a @click="parseApi(url)" class="mdui-list-item mdui-ripple">
 								{{url}}
 							</a>
                     </div>
@@ -511,7 +511,7 @@
                 </div>
                 <div class="mdui-dialog-content">
                     <div class="mdui-list" v-for="url in localStar">
-                        <a v-on:click="parseApi(url)" class="mdui-list-item mdui-ripple">
+                        <a @click="parseApi(url)" class="mdui-list-item mdui-ripple">
 								{{url}}
 							</a>
                     </div>
@@ -646,7 +646,7 @@
                     </div>
                 </div>
                 <div class="mdui-card-actions">
-                    <button class="mdui-btn mdui-ripple" v-on:click="Perror=false">
+                    <button class="mdui-btn mdui-ripple" @click="Perror=false">
                         关闭
                     </button>
                 </div>
@@ -667,7 +667,7 @@
                     </div>
                 </div>
                 <div class="mdui-card-actions">
-                    <button class="mdui-btn mdui-ripple" v-on:click="PresponseC=true">
+                    <button class="mdui-btn mdui-ripple" @click="PresponseC=true">
                         关闭
                     </button>
                 </div>
