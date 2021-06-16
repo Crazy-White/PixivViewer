@@ -158,7 +158,7 @@ let app = new Vue({
         getTags: function () {
             if (app.showHotTags) {
                 axios
-                    .get('https://api.imjad.cn/pixiv/v2/?type=tags')
+                    .get('https://api.obfs.dev/api/pixiv/?type=tags')
                     .then(function (response) {
                         app.PresponseC = arrayAddProxy(response.data.trend_tags);
                     })
@@ -243,18 +243,18 @@ let app = new Vue({
                     case 'related':
                     case 'favorite':
                     case 'member_illust':
-                        return 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid;
+                        return 'https://api.obfs.dev/api/pixiv/?type=' + app.Ptype + '&id=' + app.Pid;
                         break;
                     case 'following':
                     case 'follower':
                         if (isNaN(Number(app.Ppage))) app.Ppage = 1;
-                        return 'https://api.imjad.cn/pixiv/v2/?type=' + app.Ptype + '&id=' + app.Pid + '&page=' + app.Ppage;
+                        return 'https://api.obfs.dev/api/pixiv/?type=' + app.Ptype + '&id=' + app.Pid + '&page=' + app.Ppage;
                         break;
                     case 'search':
                         //若搜索关键词
                         if (isNaN(Number(app.Ppage))) app.Ppage = 1;
                         return (
-                            'https://api.imjad.cn/pixiv/v2/?type=search&mode=' +
+                            'https://api.obfs.dev/api/pixiv/?type=search&mode=' +
                             app.PmodeSearch +
                             '&order=' +
                             app.Porder +
@@ -266,15 +266,15 @@ let app = new Vue({
                         break;
                     case 'rank':
                         //若查询排行榜
-                        return 'https://api.imjad.cn/pixiv/v2/?type=rank&mode=' + app.PmodeRank + '&date=' + app.Pdate;
+                        return 'https://api.obfs.dev/api/pixiv/?type=rank&mode=' + app.PmodeRank + '&date=' + app.Pdate;
                         break;
                     case 'illust':
                         //若查询插画
-                        return 'https://api.imjad.cn/pixiv/v2/?type=illust&id=' + app.Pid;
+                        return 'https://api.obfs.dev/api/pixiv/?type=illust&id=' + app.Pid;
                         break;
                     case 'member':
                         //若查询画师
-                        return 'https://api.imjad.cn/pixiv/v2/?type=member&id=' + app.Pid;
+                        return 'https://api.obfs.dev/api/pixiv/?type=member&id=' + app.Pid;
                         break;
                     default:
                         //否则为空
@@ -408,7 +408,7 @@ function arrayAddProxy(arr) {
     //给对象添加代理
     switch (app.picked) {
         case 'planA':
-            var url = JSON.stringify(arr).replace(/https:\/\/i.pximg/g, 'http://pixiv.dns.navy/view.php/https://i.pximg');
+            var url = JSON.stringify(arr).replace(/i.pximg.net/g, 'i.pixiv.cat');
             break;
         case 'planB':
             var url = JSON.stringify(arr).replace(/https:\/\/i.pximg.net/g, 'https://www.moe123.net/api/imageproxy');
